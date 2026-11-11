@@ -34,7 +34,7 @@ const system = {
   disks: [{ mount: 'C:\\', label: 'System', fs: 'NTFS', total: 1e12, free: 640e9, pct: 36 }],
   procs: apps.map((a, i) => ({ pid: Number(a.pids), name: a.name, path: a.path, cpu: 5 / (i + 1), mem: Math.round(1.3e9 / (i + 1)), io: 1e6 / (i + 1), threads: 24 + i, handles: 300 + i * 16, app: a.key, netIn: a.rateIn, netOut: a.rateOut })),
 };
-const status = { app: 'packettrail', version: '1.0.1', copyright: '© 2026 Matthew Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
+const status = { app: 'packettrail', version: '1.0.2', copyright: '© 2026 Matthew Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
 
 function fixture(url) {
   switch (url.pathname) {
@@ -89,7 +89,7 @@ try {
   const pending = new Map(); let nextId = 0;
   socket.addEventListener('message', event => { const m = JSON.parse(event.data); if (m.id) { const p = pending.get(m.id); if (!p) return; pending.delete(m.id); m.error ? p.reject(new Error(JSON.stringify(m.error))) : p.resolve(m.result); } else if (m.method === 'Runtime.exceptionThrown') errors.push(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text); });
   const call = (method, params = {}) => new Promise((resolve, reject) => { const id = ++nextId; pending.set(id, { resolve, reject }); socket.send(JSON.stringify({ id, method, params })); });
-  const evaluate = async expression => { const r = await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }); if (r.exceptionDetails) throw new Error(r.exceptionDetails.text); return r.result.value; };
+  const evaluate = async expression => { const r = await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }); if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text); return r.result.value; };
   await call('Page.enable'); await call('Runtime.enable');
   await call('Page.addScriptToEvaluateOnNewDocument', { source: `localStorage.setItem('pt.theme', JSON.stringify('dark')); localStorage.setItem('pt.tourSeen', 'true'); localStorage.setItem('pt.view', 'plain');` });
   async function viewport(width, height, theme) {
@@ -131,6 +131,41 @@ try {
   await screenshot(join(root, 'dist', 'qa', 'path-labels.png'));
   await writeFile(join(root, 'dist', 'qa', 'path-checks.json'), JSON.stringify(pathChecks, null, 2));
   console.log('Path labels and complete organisation tooltips verified:', JSON.stringify(pathChecks.labels));
+  const scrollChecks = await evaluate(`(() => {
+    const panel = document.querySelector('#toolPanel');
+    panel.innerHTML = '<div id="scroll-regression" style="width:500px"></div>';
+    const diag = new Diag(document.querySelector('#scroll-regression'), '203.0.113.20');
+    const hops = Array.from({length:20}, (_, i) => ({ttl:i+1,addr:'203.0.113.'+(i+1),asn:64500+i,asOrg:'Example Network',sent:10,recv:10,loss:0,last:12,avg:12,best:10,worst:14,stdev:1}));
+    for (const kind of ['mtr', 'trace']) {
+      diag.setKind(kind);
+      diag.data = {kind,target:'203.0.113.20',hops,rounds:10};
+      diag.running = true;
+      diag.render();
+      const path = diag.body.querySelector('.path-strip');
+      const table = diag.body.querySelector('.diag-scroll');
+      if (path.scrollWidth <= path.clientWidth || table.scrollWidth <= table.clientWidth) throw new Error('Fixture must overflow');
+      for (const x of [240, 80, 300, 0]) {
+        path.scrollLeft = x; table.scrollLeft = x;
+        const before = [path.scrollLeft, table.scrollLeft];
+        for (let round=0; round<3; round++) {
+          diag.data.rounds++;
+          hops.forEach(h => { h.sent++; h.recv++; });
+          diag.render();
+          if (diag.body.querySelector('.path-strip') !== path || diag.body.querySelector('.diag-scroll') !== table) throw new Error('Live refresh replaced scroll containers');
+          if (path.scrollLeft !== before[0] || table.scrollLeft !== before[1]) throw new Error('Live refresh reset horizontal scrolling');
+          if (!table.textContent.includes(String(hops[0].sent))) throw new Error('Statistics stopped updating');
+        }
+      }
+      path.scrollLeft = 200; table.scrollLeft = 100;
+      diag.finish('Completed');
+      if (path.scrollLeft !== 200 || table.scrollLeft !== 100) throw new Error('Completion reset scrolling');
+      diag.setKind(kind);
+      if (diag.body.querySelector('.path-strip')) throw new Error('New diagnostic retained old results');
+    }
+    return {mtr:true, traceroute:true, containersPreserved:true, resultsUpdate:true};
+  })()`);
+  await writeFile(join(root, 'dist', 'qa', 'scroll-checks.json'), JSON.stringify(scrollChecks, null, 2));
+  console.log('Live diagnostic scrolling verified:', JSON.stringify(scrollChecks));
   const checks = [];
   for (const [width, height, name] of [[1440, 1000, 'desktop'], [390, 844, 'mobile']]) {
     await viewport(width, height, 'dark');

@@ -142,3 +142,19 @@ ip:
 		t.Fatalf("netstat -s %+v", ns)
 	}
 }
+
+// macOS honours the user's numeric locale, including decimal commas.
+func TestMacDecimalComma(t *testing.T) {
+	ps := parsePs("613 40,6 107472 /System/Library/WindowServer\n1502 11,7 34928 /Applications/Example App.app/Contents/MacOS/App\n")
+	if len(ps) != 2 || ps[0].cpu != 40.6 || ps[1].cpu != 11.7 || ps[0].rss != 107472*1024 {
+		t.Fatalf("locale-specific process stats: %+v", ps)
+	}
+	for _, value := range []string{"40.6", "40,6"} {
+		if got := atof(value); got != 40.6 {
+			t.Errorf("atof(%q) = %v", value, got)
+		}
+	}
+	if total, used := parseSwapUsage("total = 2048,00M used = 1024,50M free = 1023,50M"); total != 2048<<20 || used != uint64(1024.5*(1<<20)) {
+		t.Fatalf("locale-specific swap: %d %d", total, used)
+	}
+}

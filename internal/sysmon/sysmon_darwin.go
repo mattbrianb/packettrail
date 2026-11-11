@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"context"
 	"math"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -43,7 +44,9 @@ type macSource struct {
 func run(name string, args ...string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	b, _ := exec.CommandContext(ctx, name, args...).Output()
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Env = append(os.Environ(), "LC_ALL=C", "LANG=C")
+	b, _ := cmd.Output()
 	return string(b)
 }
 
@@ -78,6 +81,7 @@ func (s *macSource) close() { s.cancel() }
 func (s *macSource) iostat(ctx context.Context) {
 	for ctx.Err() == nil {
 		cmd := exec.CommandContext(ctx, "iostat", "-w", "2", "-n", "8")
+		cmd.Env = append(os.Environ(), "LC_ALL=C", "LANG=C")
 		out, err := cmd.StdoutPipe()
 		if err != nil || cmd.Start() != nil {
 			return

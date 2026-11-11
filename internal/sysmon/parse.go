@@ -15,7 +15,7 @@ func atou(s string) uint64 {
 }
 
 func atof(s string) float64 {
-	f, _ := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	f, _ := strconv.ParseFloat(strings.ReplaceAll(strings.TrimSpace(s), ",", "."), 64)
 	return f
 }
 

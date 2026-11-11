@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.0.1 · MIT licence ·
+By Matthew Burnett · version 1.0.2 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**

@@ -1067,8 +1067,18 @@ class Diag {
         + `<td class="trunc">${where}</td><td class="num loss ${lossCls}">${h.sent ? h.loss.toFixed(1) + '%' : '–'}</td><td class="num dim">${h.sent}</td>`
         + `<td class="num">${fmtMs(h.recv ? h.last : -1)}</td><td class="num strong">${fmtMs(h.recv ? h.avg : -1)}</td><td class="num">${fmtMs(h.recv ? h.best : -1)}</td><td class="num">${fmtMs(h.recv ? h.worst : -1)}</td><td class="num dim">${fmtMs(h.recv ? h.stdev : -1)}</td><td class="rangecell">${range}</td></tr>`;
     }).join('');
-    const note = d.note ? `<div class="diag-note">${esc(d.note)}</div>` : '';
-    this.body.innerHTML = `${note}${pathStrip(d)}<div class="diag-scroll"><table class="mini hops"><thead><tr><th class="num">#</th><th>Host</th><th>Network</th><th>Location</th><th class="num">Loss</th><th class="num">Sent</th><th class="num">Last</th><th class="num">Avg</th><th class="num">Best</th><th class="num">Worst</th><th class="num">StDev</th><th>Latency (ms)</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    // Keep scroll owners alive across updates, including trackpad momentum.
+    if (!this.body.querySelector('.diag-scroll')) {
+      this.body.innerHTML = '<div class="diag-note" hidden></div><div class="path-strip"></div><div class="diag-scroll"></div>';
+    }
+    const noteEl = this.body.querySelector('.diag-note');
+    noteEl.hidden = !d.note;
+    noteEl.textContent = d.note || '';
+    const path = this.body.querySelector('.path-strip');
+    const nextPath = document.createElement('template');
+    nextPath.innerHTML = pathStrip(d);
+    path.replaceChildren(...(nextPath.content.firstElementChild?.childNodes || []));
+    this.body.querySelector('.diag-scroll').innerHTML = `<table class="mini hops"><thead><tr><th class="num">#</th><th>Host</th><th>Network</th><th>Location</th><th class="num">Loss</th><th class="num">Sent</th><th class="num">Last</th><th class="num">Avg</th><th class="num">Best</th><th class="num">Worst</th><th class="num">StDev</th><th>Latency (ms)</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   renderSeries(d) {
     const tiles = [
