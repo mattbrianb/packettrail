@@ -31,13 +31,13 @@ import (
 	"packettrail/internal/web"
 )
 
-var version = "1.0.0"
+var version = "1.0.1"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).
 const (
-	publisher = "Matt Burnett"
-	copyright = "© 2026 Matt Burnett"
+	publisher = "Matthew Burnett"
+	copyright = "© 2026 Matthew Burnett"
 )
 
 type config struct {

@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matt Burnett · version 1.0.0 · MIT licence ·
+By Matthew Burnett · version 1.0.1 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -160,8 +160,8 @@ leaves the PC, troubleshooting, and a button to replay the tour.
     left, then each hop as a dot with its latency, grouped into coloured
     bands per network (your LAN, your ISP, an internet exchange, transit,
     the destination). Yellow and red dots mark hops with loss, and a dashed
-    line marks hops that didn't answer. Hover a band or dot for the full
-    name. Exchange LANs that aren't announced in BGP are recognised from
+    line marks hops that didn't answer. Network bands show the compact ASN;
+    hover a band or dot for the full organisation name. Exchange LANs that aren't announced in BGP are recognised from
     their reverse DNS (for example `….ixp.durban`). Private addresses count
     as **your LAN** only until the path first leaves it: a later hop that
     answers from a private address is a provider's router. It is shown
@@ -562,7 +562,7 @@ What's weaker than on Windows, and why:
 
 ## Licences and attribution
 
-PacketTrail is © 2026 Matt Burnett. The publisher and copyright appear in the
+PacketTrail is © 2026 Matthew Burnett. The publisher and copyright appear in the
 Windows file properties of `packettrail.exe` (*Details* tab), in Task
 Manager, in *Settings → About* and in `packettrail --version`.
 

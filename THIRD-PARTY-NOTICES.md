@@ -1,6 +1,6 @@
 # Third-party notices
 
-PacketTrail is (c) 2026 Matt Burnett and released under the MIT licence (LICENSE).
+PacketTrail is (c) 2026 Matthew Burnett and released under the MIT licence (LICENSE).
 
 - **IP geolocation by DB-IP** (https://db-ip.com): the DB-IP Lite City and ASN databases, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). The app downloads them on first start; they are not part of the download.
 - **Country flags:** the Twemoji Country Flags font (TalkJS, MIT), with Twemoji graphics licensed CC BY 4.0. In the release downloads the full text follows below; in the source it is third_party/TwemojiCountryFlags-LICENSE.md.

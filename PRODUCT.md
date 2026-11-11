@@ -51,7 +51,7 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 ## Brand Commitments
 
 - **Name:** PacketTrail.
-- **Publisher and copyright:** Matt Burnett.
+- **Publisher and copyright:** Matthew Burnett.
 - **Look:** the website uses the app's own theme. That means neutral dark and light surfaces and the app's data colours: download blue, upload orange, and status green, yellow and red.
   - A slight glow goes on data (lines, dots, markers), never on text.
   - Controls are flat, GNOME/Adwaita-like, with no gradients or gloss.

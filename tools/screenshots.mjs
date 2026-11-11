@@ -34,7 +34,7 @@ const system = {
   disks: [{ mount: 'C:\\', label: 'System', fs: 'NTFS', total: 1e12, free: 640e9, pct: 36 }],
   procs: apps.map((a, i) => ({ pid: Number(a.pids), name: a.name, path: a.path, cpu: 5 / (i + 1), mem: Math.round(1.3e9 / (i + 1)), io: 1e6 / (i + 1), threads: 24 + i, handles: 300 + i * 16, app: a.key, netIn: a.rateIn, netOut: a.rateOut })),
 };
-const status = { app: 'packettrail', version: '1.0.0', copyright: '© 2026 Matt Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
+const status = { app: 'packettrail', version: '1.0.1', copyright: '© 2026 Matthew Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
 
 function fixture(url) {
   switch (url.pathname) {
@@ -107,6 +107,30 @@ try {
     if (tab === 'apps') { await screenshot(join(root, 'docs', 'assets', 'overview-dark.png')); await evaluate(`applyTheme('light', false)`); await pause(500); await screenshot(join(root, 'docs', 'assets', 'apps-light.png')); }
     console.log(`Captured ${tab} dashboard with synthetic fixtures`);
   }
+  // Reproduce narrow ASN bands with long organisation names in the actual renderer.
+  await navigate(`${baseUrl}/?notour&tab=tools`);
+  const pathChecks = await evaluate(`(() => {
+    const make = (ttl, addr, extra = {}) => ({ttl, addr, host: '', sent: 10, recv: 10, loss: 0, avg: 12, best: 10, worst: 14, ...extra});
+    const hops = [make(1, '192.168.50.1', {scope: 'private', zone: 'lan'}), make(2, '192.168.1.1', {scope: 'private', zone: 'lan'}), make(3, '10.123.16.1', {scope: 'private', zone: 'lan'}), make(4, '203.0.113.4', {asn: 61092, asOrg: '123 Network Organisation With A Very Long Name'}), make(5, '203.0.113.5', {asn: 36994, asOrg: 'Vodacom Network Organisation With A Very Long Name'}), make(6, '203.0.113.6', {asn: 8075, asOrg: 'Microsoft Corporation'})];
+    const panel = document.querySelector('#toolPanel');
+    document.querySelector('#toolEmpty').hidden = true;
+    panel.hidden = false;
+    panel.innerHTML = '<section class="card"><div class="card-label">MTR · synthetic path preview</div>' + pathStrip({target:'203.0.113.6', reached:true, hops}) + '</section>';
+    const bands = [...panel.querySelectorAll('.path-band')];
+    const labels = bands.map(b => b.querySelector('.band-label').textContent);
+    const titles = bands.map(b => b.querySelector('title').textContent);
+    if (JSON.stringify(labels) !== JSON.stringify(['Your LAN','AS61092','AS36994','AS8075'])) throw new Error('Unexpected path labels: ' + labels.join(','));
+    if (!titles[1].includes(hops[3].asOrg) || !titles[2].includes(hops[4].asOrg)) throw new Error('Full organisation missing from hover title');
+    for (const b of bands) { const t=b.querySelector('text').getBBox(), r=b.querySelector('rect'); if (t.x+t.width > Number(r.getAttribute('x'))+Number(r.getAttribute('width'))-5) throw new Error('Band label overflows its rectangle'); }
+    const probe = document.createElement('div');
+    probe.innerHTML = pathStrip({target:'203.0.113.9', hops:[make(1,'10.0.0.1',{scope:'private',zone:'provider',inAsn:4294967295,inOrg:'Provider <Research> & Transit'}),make(2,'203.0.113.9',{asn:8075,asOrg:'Microsoft Corporation'})]});
+    if (probe.querySelector('.band-label').textContent !== 'AS4294967295') throw new Error('Inferred provider ASN was shortened');
+    if (!probe.querySelector('title').textContent.includes('Provider <Research> & Transit')) throw new Error('Provider organisation tooltip was lost or escaped incorrectly');
+    return {labels, titles, inferredAsn: true, organisationsPreserved: true, labelsFit: true};
+  })()`);
+  await screenshot(join(root, 'dist', 'qa', 'path-labels.png'));
+  await writeFile(join(root, 'dist', 'qa', 'path-checks.json'), JSON.stringify(pathChecks, null, 2));
+  console.log('Path labels and complete organisation tooltips verified:', JSON.stringify(pathChecks.labels));
   const checks = [];
   for (const [width, height, name] of [[1440, 1000, 'desktop'], [390, 844, 'mobile']]) {
     await viewport(width, height, 'dark');

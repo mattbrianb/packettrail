@@ -27,7 +27,7 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>© 2026 Matt Burnett</string>
+	<string>© 2026 Matthew Burnett</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<!-- the dashboard is served on 127.0.0.1 by the app itself -->

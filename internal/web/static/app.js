@@ -738,8 +738,12 @@ function pathStrip(d) {
   segs.forEach((s, si) => {
     const x0 = padL + s.from * nodeW + 4, x1 = padL + (s.to + 1) * nodeW - 4;
     const local = s.key.startsWith('scope:') || s.key === 'provider';
-    svg += `<rect x="${x0}" y="12" width="${x1 - x0}" height="${H - 22}" rx="12" class="band ${local ? 'local' : 'b' + (si % 6)}"><title>${esc(s.key === 'provider' ? PROVIDER_PRIVATE : s.label || '')}</title></rect>`;
-    svg += `<text x="${x0 + 10}" y="29" class="band-label">${esc(trimTo(s.label, Math.floor((x1 - x0 - 16) / 6.4)))}</text>`;
+    // Keep narrow network bands readable; the complete organisation stays on hover.
+    const label = s.key.startsWith('as:') ? `AS${s.key.slice(3)}` : s.label;
+    const title = s.key === 'provider' ? PROVIDER_PRIVATE : s.label || '';
+    svg += `<g class="path-band"><title>${esc(title)}</title>`
+      + `<rect x="${x0}" y="12" width="${x1 - x0}" height="${H - 22}" rx="12" class="band ${local ? 'local' : 'b' + (si % 6)}"/>`
+      + `<text x="${x0 + 10}" y="29" class="band-label">${esc(trimTo(label, Math.floor((x1 - x0 - 16) / 6.4)))}</text></g>`;
   });
   svg += `<line x1="52" y1="${cy}" x2="${X(0)}" y2="${cy}" class="edge"/>`;
   for (let i = 1; i < hops.length; i++) {

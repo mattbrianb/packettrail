@@ -2,7 +2,7 @@
 # portable Go toolchain in .\.toolchain (falls back to a "go" on PATH).
 #   .\build.ps1              # test + build all targets
 #   .\build.ps1 -SkipTests   # build only
-param([string]$Version = "1.0.0", [switch]$SkipTests)
+param([string]$Version = "1.0.1", [switch]$SkipTests)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $tc = Join-Path $root '.toolchain'
