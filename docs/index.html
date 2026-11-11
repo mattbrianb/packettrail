@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en" data-reg="plain" data-os="windows" data-arch="x64">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PacketTrail: see what's using your internet</title>
+<meta name="description" content="PacketTrail is a free, portable network monitor for Windows, macOS and Linux. See every app's live bandwidth, who it talks to and where, path quality, MTR and ping, and a check of the computer itself. Nothing sent to the cloud.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0c0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="PacketTrail">
+<meta property="og:description" content="What's using my internet? See every app's live bandwidth and who it's talking to. Free, for Windows, macOS and Linux.">
+<meta property="og:image" content="https://mattbrianb.github.io/packettrail/assets/icon.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="stylesheet" href="site.css">
+<script src="os.js"></script>
+<script>try { var v = new URLSearchParams(location.search).get('view') || localStorage.getItem('pt.view'); if (v === 'engineer') document.documentElement.dataset.reg = 'eng'; } catch (e) {}</script>
+<script type="module" src="site.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="PacketTrail, back to top">
+      <svg class="mark" viewBox="0 0 160 160" width="30" height="30" aria-hidden="true"><rect x="1" y="1" width="158" height="158" rx="36" class="mark-tile"/><path d="M43 120V86q0-10 10-10h48q19 0 19-19t-19-19H76" fill="none" stroke="#f2f2f4" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="120" r="9" fill="#f2f2f4"/><rect x="61" y="23" width="30" height="30" rx="8" fill="#43afff"/><circle cx="73" cy="76" r="8" fill="#ff9a52"/></svg>
+      <span>PacketTrail</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="#what">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#download">Download</a>
+      <a href="#support">Support</a>
+    </nav>
+    <div class="top-end">
+      <div class="seg reg-switch compact" role="radiogroup" aria-label="Explain things">
+        <button type="button" role="radio" data-set="plain">Plain</button>
+        <button type="button" role="radio" data-set="eng">Engineer</button>
+      </div>
+      <a class="gh" href="https://github.com/mattbrianb/packettrail" aria-label="PacketTrail on GitHub">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="fibers" id="fibers" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 class="swap">
+          <span data-v="plain">What's using my internet?</span>
+          <span data-v="eng">Which process? Which ASN?</span>
+        </h1>
+        <div class="seg reg-switch" role="radiogroup" aria-label="Explain things">
+          <button type="button" role="radio" data-set="plain">Plain</button>
+          <button type="button" role="radio" data-set="eng">Engineer</button>
+        </div>
+        <div class="swap lede">
+          <p data-v="plain">See every app's live download and upload, who it's talking to and where they are, and catch whatever is hogging your connection while it's happening.</p>
+          <p data-v="eng">Per-process throughput, every remote IP mapped to its ASN and location offline, RTT, loss and retransmits from the TCP stack, plus MTR, monitors and a system check.</p>
+        </div>
+        <!-- One button per system: os.js picks, and Windows is the default. -->
+        <div class="cta">
+          <a class="btn primary" data-for="windows" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download for Windows
+          </a>
+          <a class="btn primary" data-for="macos" href="#download">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download for macOS
+          </a>
+          <a class="btn primary" data-for="linux" data-arch-for="x64" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download for Linux
+          </a>
+          <a class="btn primary" data-for="linux" data-arch-for="arm64" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download for Linux
+          </a>
+          <a class="btn" href="https://github.com/mattbrianb/packettrail">View the source</a>
+        </div>
+        <p class="fine" data-for="windows">Free · version 1.0.0 · Windows 10 and 11, 64-bit · also <a href="#download">macOS and Linux</a></p>
+        <p class="fine" data-for="macos">Free · version 1.0.0 · Apple silicon and Intel · also <a href="#download">Windows and Linux</a></p>
+        <p class="fine" data-for="linux"><span data-arch-for="x64">Free · version 1.0.0 · x64</span><span data-arch-for="arm64">Free · version 1.0.0 · ARM64</span> · also <a href="#download">Windows and macOS</a></p>
+      </div>
+
+      <div class="stage" id="demo" role="img" aria-label="Demo of PacketTrail with demo data: steam.exe climbs to the top of the Applications table at about 48 Mbps, and PacketTrail shows it is talking to Valve's servers in Frankfurt.">
+        <div class="win" aria-hidden="true">
+          <div class="win-bar">
+            <svg class="win-mark" viewBox="0 0 160 160" width="18" height="18"><rect x="1" y="1" width="158" height="158" rx="36" class="mark-tile"/><path d="M43 120V86q0-10 10-10h48q19 0 19-19t-19-19H76" fill="none" stroke="#f2f2f4" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="120" r="9" fill="#f2f2f4"/><rect x="61" y="23" width="30" height="30" rx="8" fill="#43afff"/><circle cx="73" cy="76" r="8" fill="#ff9a52"/></svg>
+            <b>PacketTrail</b><span class="win-host">DEMO-PC · windows</span>
+            <span class="pill-demo">Demo data</span>
+          </div>
+          <div class="win-top">
+            <div class="kpis">
+              <div class="kpi"><span class="kpi-l"><i class="live rx"></i>Download</span><b id="kDown">21.6 Mbps</b></div>
+              <div class="kpi"><span class="kpi-l"><i class="live tx"></i>Upload</span><b id="kUp">1.75 Mbps</b></div>
+            </div>
+            <svg class="win-chart" id="chart" viewBox="0 0 400 90" preserveAspectRatio="none">
+              <path class="c-area" d=""/><path class="c-rx" d=""/><path class="c-tx" d=""/>
+            </svg>
+          </div>
+          <div class="win-tabs"><span class="on">Applications</span><span>Remote IPs</span><span>Networks</span><span>Peering</span><span>Monitors</span><span class="t-more">System</span></div>
+          <div class="w-head">
+            <span>Application</span>
+            <span class="num sorted">Total rate <svg viewBox="0 0 10 10" width="9" height="9"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="num">↓ Rate</span><span class="num">↑ Rate</span><span class="num c-ips">Remote IPs</span><span class="num">RTT</span><span class="num">Loss ↓</span>
+          </div>
+          <div class="w-rows" id="rows"></div>
+        </div>
+        <div class="callout c1" aria-hidden="true">
+          <div class="swap">
+            <div data-v="plain"><b>Steam is downloading a game update</b><span>That's most of your connection right now</span></div>
+            <div data-v="eng"><b>steam.exe · 6 remote IPs</b><span>46.9 Mbps down · 1.3 Mbps up · TCP</span></div>
+          </div>
+        </div>
+        <div class="callout c2" aria-hidden="true">
+          <div class="swap">
+            <div data-v="plain"><b>It's talking to Valve's servers</b><span>In Frankfurt, Germany</span></div>
+            <div data-v="eng"><b>AS32590 Valve Corporation</b><span>Frankfurt, DE · RTT 46 ms · loss 0.04%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="q" id="what">
+    <div class="wrap q-grid">
+      <div class="q-copy">
+        <h2>What's using it?</h2>
+        <div class="swap">
+          <div data-v="plain">
+            <p>Every app that touches the network, with its live download and upload. Sort by <b>Total rate</b> and whatever is hogging the connection rises to the top as it happens, so you catch it in the act.</p>
+            <ul class="ticks"><li>History for the last hour, day, week or month</li><li>Click an app to see everything it talks to</li><li>Export any table to CSV</li></ul>
+          </div>
+          <div data-v="eng">
+            <p>Per-process byte counts from the ETW Kernel-Network provider, TCP and UDP, grouped per executable across all its PIDs. Total, ↓ and ↑ rate per app, with RTT, loss and retransmits beside them.</p>
+            <ul class="ticks"><li>1H, 24H, 7D, 30D and All history in a local SQLite store</li><li>Per-app endpoint list with remote IP, hostname and owner</li><li>CSV export of every table</li></ul>
+          </div>
+        </div>
+      </div>
+      <figure class="shot bleed-r">
+        <div class="crop" style="--cx:0;--cy:300;--cw:1000;--ch:520;--mcx:104;--mcy:348;--mcw:596;--mch:330">
+          <picture>
+            <source srcset="assets/apps-light.png" media="(prefers-color-scheme: light)">
+            <img src="assets/apps-dark.png" width="1600" height="900" loading="lazy" alt="PacketTrail's Applications table, sorted by Total rate, with chrome.exe at the top at 16.5 Mbps.">
+          </picture>
+        </div>
+        <figcaption class="sat sat-bl swap">
+          <span data-v="plain"><b>Chrome is the busiest app right now</b><small>16.5 Mbps, about a third of the connection</small></span>
+          <span data-v="eng"><b>chrome.exe · 33 remote IPs</b><small>36 endpoints · RTT 46.9 ms · loss 0.25%</small></span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="q q-wide" id="who">
+    <div class="wrap">
+      <div class="q-head">
+        <h2>Who is it talking to?</h2>
+        <div class="swap">
+          <div data-v="plain">
+            <p>Every address an app connects to, with the company that owns it, the country and the city, and the website name the app looked up. Click any row and the details slide in.</p>
+            <ul class="ticks"><li>Grouped by company, so you see who gets your traffic</li><li>Lookups work offline and never leave your PC</li><li>See which exchanges your provider shares with each network</li></ul>
+          </div>
+          <div data-v="eng">
+            <p>Remote IPs with ASN, AS organisation, country and city from the DB-IP Lite databases (offline, cached), reverse DNS, and the hostname the app resolved, taken from the Windows DNS client.</p>
+            <ul class="ticks"><li>Traffic per ASN and per peering partner</li><li>PeeringDB policy and common IXPs per network</li><li>Your own ASN, detected from the first public hop</li></ul>
+          </div>
+        </div>
+      </div>
+      <figure class="shot">
+        <div class="crop" style="--cx:0;--cy:300;--cw:1600;--ch:500;--mcx:960;--mcy:348;--mcw:640;--mch:400">
+          <img src="assets/ips-dark.png" width="1600" height="900" loading="lazy" alt="The Remote IPs table: each address with its rates, RTT, loss, country, city, ASN and owning organisation.">
+        </div>
+        <figcaption class="sat sat-br swap">
+          <span data-v="plain"><b>That one's Cloudflare, in Toronto</b><small>Owner and city come from offline lookups</small></span>
+          <span data-v="eng"><b>AS13335 · Cloudflare, Inc.</b><small>Toronto, CA · DB-IP Lite, resolved offline</small></span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="q" id="path">
+    <div class="wrap q-grid">
+      <div class="q-copy">
+        <h2>Is it the network, or the path?</h2>
+        <div class="swap">
+          <div data-v="plain">
+            <p>See whether your connection is slow or dropping, run the same tests your provider's help desk asks for, and copy the results straight into your support ticket.</p>
+            <ul class="ticks"><li>Watch your router, DNS or game server in the background</li><li>Spot drops and lag spikes in the history</li><li>Traceroute and MTR to any address or name</li></ul>
+          </div>
+          <div data-v="eng">
+            <p>RTT, download loss and retransmits from Windows' own TCP statistics, with no probes sent. MTR, traceroute, ping and TCP port checks to any target, hops grouped by network, and ICMP or TCP monitors every 1 to 30 s.</p>
+            <ul class="ticks"><li>Loss, jitter and min/avg/max per monitor</li><li>Route map: paths to your top networks, merged into one tree</li><li>Results as plain text, ready for a ticket</li></ul>
+          </div>
+        </div>
+      </div>
+      <figure class="shot bleed-r">
+        <div class="crop" style="--cx:16;--cy:300;--cw:1100;--ch:370;--mcx:30;--mcy:380;--mcw:660;--mch:280">
+          <img src="assets/monitors-dark.png" width="1600" height="900" loading="lazy" alt="The Monitors view: Cloudflare, Google and Quad9 DNS with last, average, min/max, jitter, loss and a latency chart for each.">
+        </div>
+        <figcaption class="sat sat-bl swap">
+          <span data-v="plain"><b>Cloudflare DNS: no drops</b><small>Steady around 11 ms for the last 10 minutes</small></span>
+          <span data-v="eng"><b>1.1.1.1 · ICMP every 2 s</b><small>avg 11.4 ms · jitter 1.86 ms · loss 0.0%</small></span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="q flip" id="pc">
+    <div class="wrap q-grid">
+      <div class="q-copy">
+        <h2>Or is it the PC?</h2>
+        <div class="swap">
+          <div data-v="plain">
+            <p>Sometimes it isn't the network at all. The System tab checks the computer and tells you in plain words what's worth a look.</p>
+            <ul class="ticks"><li>Memory, disk and processor load at a glance</li><li>Programs using the network, next to their CPU and memory</li><li>Network adapter trouble, like a link stuck at 100 Mbit/s</li></ul>
+          </div>
+          <div data-v="eng">
+            <p>CPU per core with DPC and interrupt time, memory and commit, disk busy and latency, adapter errors and discards, TCP/UDP stack counters, and each process's network rate beside its CPU and memory.</p>
+            <ul class="ticks"><li>Findings on sustained thresholds, not single spikes</li><li>Retransmits, resets and failed connects per second</li><li>Link speed per adapter</li></ul>
+          </div>
+        </div>
+      </div>
+      <figure class="shot bleed-l">
+        <div class="crop" style="--cx:0;--cy:296;--cw:1000;--ch:372;--mcx:405;--mcy:298;--mcw:400;--mch:148">
+          <img src="assets/system-dark.png" width="1600" height="900" loading="lazy" alt="The System view: CPU, memory, disk and TCP retransmit tiles, a finding that memory is nearly full, and a 15-minute chart.">
+        </div>
+        <figcaption class="sat sat-br swap">
+          <span data-v="plain"><b>Memory is nearly full</b><small>That alone can make everything feel slow</small></span>
+          <span data-v="eng"><b>Memory 95% · commit 87%</b><small>16.2 of 17.1 GB in use · paging to disk</small></span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="privacy" id="privacy">
+    <div class="wrap privacy-grid">
+      <div>
+        <h2>It stays on your PC</h2>
+        <div class="swap">
+          <p data-v="plain">No account, no ads, no tracking. PacketTrail keeps its history, settings and test results in a folder next to the program. It only sends out what's listed here.</p>
+          <p data-v="eng">No telemetry. History is a local SQLite file beside the exe, and GeoIP and ASN lookups are offline. Outbound traffic is limited to the list here.</p>
+        </div>
+        <p class="fine">The source is open, so you can check: <a href="https://github.com/mattbrianb/packettrail">github.com/mattbrianb/packettrail</a></p>
+      </div>
+      <div class="swap">
+        <ul class="leaves" data-v="plain">
+          <li><b>Name lookups</b> to your own DNS server, to show website names</li>
+          <li><b>Anonymous look-ups</b> of network owners, on the Peering tab</li>
+          <li><b>The tests you start</b> yourself: traceroute, ping and monitors</li>
+          <li><b>A free location database</b>, downloaded once on first start</li>
+        </ul>
+        <ul class="leaves" data-v="eng">
+          <li><b>Reverse DNS</b> (PTR) via your configured resolver</li>
+          <li><b>PeeringDB</b> API queries by ASN, anonymous, Peering tab only</li>
+          <li><b>Probes you start</b>, plus a few ICMP probes towards 1.1.1.1 for ISP detection, at most every 6 hours</li>
+          <li><b>DB-IP Lite</b> City and ASN, about 135 MB, on first start; <code>--no-geoip-download</code> skips it</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="download" id="download">
+    <div class="wrap">
+      <div class="dl-head">
+        <div>
+          <h2>Download PacketTrail</h2>
+          <p data-for="windows">Free, portable and open source. Extract the zip anywhere and run <code>packettrail.exe</code>. Nothing to install.</p>
+          <p data-for="macos">Free and open source. One line in Terminal puts PacketTrail in Applications and opens it, with no security prompt.</p>
+          <p data-for="linux">Free, portable and open source. Extract it anywhere and run <code>./packettrail</code>. Nothing to install.</p>
+        </div>
+        <div class="dl-main" data-for="windows">
+          <a class="btn primary big" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip">
+            <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Windows 10 / 11 · 64-bit
+          </a>
+          <span class="fine">Version 1.0.0 · zip · about 6 MB</span>
+        </div>
+        <div class="dl-main" data-for="macos">
+          <div class="cmd">
+            <code id="mac-cmd">curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash</code>
+            <button type="button" class="btn primary" data-copy="mac-cmd" aria-live="polite">Copy</button>
+          </div>
+          <span class="fine">Version 1.0.0 · paste into Terminal · or the zip for <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip">Apple silicon</a> or <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip">Intel</a></span>
+        </div>
+        <div class="dl-main" data-for="linux">
+          <a class="btn primary big" data-arch-for="x64" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">
+            <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Linux · x64
+          </a>
+          <a class="btn primary big" data-arch-for="arm64" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">
+            <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Linux · ARM64
+          </a>
+          <span class="fine" data-arch-for="x64">Version 1.0.0 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
+          <span class="fine" data-arch-for="arm64">Version 1.0.0 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
+        </div>
+      </div>
+
+      <div class="dl-grid">
+        <div class="panel" data-for="macos">
+          <h3>First run on macOS</h3>
+          <ol>
+            <li>Open <b>Terminal</b>: press <b>⌘ Space</b>, type “Terminal” and press Return.</li>
+            <li>Paste the command above and press Return. It downloads the build for your Mac, checks it against the published checksum, puts <b>PacketTrail</b> in Applications and opens it.</li>
+            <li>To update later, run the same command again.</li>
+          </ol>
+          <p class="fine"><b>Why Terminal?</b> PacketTrail is free, so it isn't notarised by Apple, which needs a paid developer account. A zip downloaded in a browser is blocked the first time, until you click <b>Open Anyway</b> in <b>System Settings → Privacy &amp; Security</b>. You can <a href="install.sh">read the script</a> before you run it.</p>
+        </div>
+        <div class="panel" data-for="linux">
+          <h3>First run on Linux</h3>
+          <ol>
+            <li>Extract it and go into the folder:
+              <pre data-arch-for="x64"><code>tar xzf packettrail-linux-x64.tar.gz
+cd packettrail-linux-x64</code></pre>
+              <pre data-arch-for="arm64"><code>tar xzf packettrail-linux-arm64.tar.gz
+cd packettrail-linux-arm64</code></pre>
+            </li>
+            <li>Run <code>./packettrail --install</code> to add PacketTrail to your apps menu, or start it with <code>./packettrail</code>. The app window needs WebKitGTK 4.1, which most desktops have; without it PacketTrail opens in your browser.</li>
+            <li><span class="swap">
+              <span data-v="plain">Start it with <code>sudo ./packettrail</code> to see every app on the computer. Without <code>sudo</code> you see your own apps.</span>
+              <span data-v="eng"><code>sudo ./packettrail</code> gives full capture: all processes, UDP and DNS names. Without root it's TCP only, for your own processes.</span>
+            </span></li>
+          </ol>
+        </div>
+        <div class="panel" data-for="windows">
+          <h3>First run on Windows</h3>
+          <ol>
+            <li>Extract the zip and double-click <code>packettrail.exe</code>.</li>
+            <li><span class="swap">
+              <span data-v="plain">Choose <b>Yes</b> at the administrator prompt to see how much data each app uses. With <b>No</b> you still see who talks to whom.</span>
+              <span data-v="eng"><b>Yes</b> gives full capture via ETW: per-app bytes, UDP and DNS names. <b>No</b> gives connections only, from the TCP table.</span>
+            </span></li>
+            <li>If Windows says “Windows protected your PC”, click <b>More info</b>, then <b>Run anyway</b>. PacketTrail isn't code-signed yet, so Windows doesn't recognise the publisher.</li>
+          </ol>
+        </div>
+        <div class="panel">
+          <h3>Check your download</h3>
+          <p>Every release lists SHA-256 checksums in <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a>. <span data-for="windows">In PowerShell:</span><span data-for="macos">The Terminal command checks it for you. For a zip:</span><span data-for="linux">In a terminal:</span></p>
+          <pre data-for="windows"><code>Get-FileHash .\packettrail-windows-x64.zip</code></pre>
+          <pre data-for="macos"><code>shasum -a 256 packettrail-macos-*.zip</code></pre>
+          <pre data-for="linux"><code>sha256sum packettrail-linux-*.tar.gz</code></pre>
+          <p class="fine">Release notes for every version are on <a href="https://github.com/mattbrianb/packettrail/releases">GitHub Releases</a>.</p>
+        </div>
+        <div class="panel platforms">
+          <h3>All downloads</h3>
+          <ul>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip"><span>Windows · x64</span><code>packettrail-windows-x64.zip</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip"><span>macOS · Apple silicon</span><code>packettrail-macos-arm64.zip</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip"><span>macOS · Intel</span><code>packettrail-macos-x64.zip</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz"><span>Linux · x64</span><code>packettrail-linux-x64.tar.gz</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz"><span>Linux · ARM64</span><code>packettrail-linux-arm64.tar.gz</code></a></li>
+          </ul>
+          <p class="fine" data-not-for="windows"><b>Windows:</b> extract the zip and run <code>packettrail.exe</code>. Choose <b>Yes</b> at the administrator prompt to see how much data each app uses.</p>
+          <p class="fine" data-not-for="macos"><b>macOS:</b> paste this into Terminal instead of downloading a zip. It puts PacketTrail in Applications, and it opens without the security prompt a browser download gets.</p>
+          <pre data-not-for="macos"><code>curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash</code></pre>
+          <p class="fine" data-not-for="linux"><b>Linux:</b> run <code>./packettrail --install</code> to add it to your apps menu. The app window needs WebKitGTK 4.1; run with <code>sudo</code> for full detail.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="support" id="support" data-donate-section hidden>
+    <div class="wrap support-in">
+      <div>
+        <h2>PacketTrail is free</h2>
+        <p>No ads, no upsell, no paid tier. If it saved you an evening of guessing, a donation helps keep it going.</p>
+      </div>
+      <div class="donate">
+        <a class="btn donate-btn" data-donate="paypal" href="" hidden>
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5.2 14.5H2.9a.4.4 0 0 1-.4-.46L4.3 2.4A.7.7 0 0 1 5 1.8h4.4c2.3 0 3.6 1.2 3.3 3.2-.4 2.6-2.2 3.6-4.5 3.6H6.9a.6.6 0 0 0-.6.5l-.6 4.9a.6.6 0 0 1-.5.5Z"/></svg>
+          Donate with PayPal
+        </a>
+        <a class="btn donate-btn" data-donate="kofi" href="" hidden>Buy me a coffee on Ko-fi</a>
+        <a class="btn donate-btn" data-donate="sponsors" href="" hidden>Sponsor on GitHub</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a class="brand small" href="#top"><svg class="mark" viewBox="0 0 160 160" width="22" height="22" aria-hidden="true"><rect x="1" y="1" width="158" height="158" rx="36" class="mark-tile"/><path d="M43 120V86q0-10 10-10h48q19 0 19-19t-19-19H76" fill="none" stroke="#f2f2f4" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="120" r="9" fill="#f2f2f4"/><rect x="61" y="23" width="30" height="30" rx="8" fill="#43afff"/><circle cx="73" cy="76" r="8" fill="#ff9a52"/></svg><span>PacketTrail</span></a>
+    <span>© 2026 Matt Burnett · <a href="https://github.com/mattbrianb/packettrail/blob/main/LICENSE">MIT licence</a> · <a href="https://github.com/mattbrianb/packettrail">Source on GitHub</a></span>
+    <span><a href="https://db-ip.com">IP Geolocation by DB-IP</a> · Flags: <a href="https://github.com/jdecked/twemoji">Twemoji</a> (CC BY 4.0) · Background: <a href="https://reactbits.dev/backgrounds/ghost-fibers">Ghost Fibers</a> by David Haz</span>
+  </div>
+</footer>
+
+<script>
+  // Donation links: fill in the ones that exist; empty ones stay hidden, and
+  // the whole section stays hidden until at least one is set.
+  const DONATE = { paypal: 'https://paypal.me/matthewbrianburnett', kofi: '', sponsors: '' };
+  let any = false;
+  for (const [k, url] of Object.entries(DONATE)) {
+    const a = document.querySelector(`[data-donate="${k}"]`);
+    if (a && url) { a.href = url; a.hidden = false; any = true; }
+  }
+  document.querySelector('[data-donate-section]').hidden = !any;
+  document.querySelectorAll('a[href="#support"]').forEach(a => { a.hidden = !any; });
+</script>
+</body>
+</html>

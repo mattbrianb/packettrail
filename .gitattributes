@@ -1,0 +1,6 @@
+*.sh text eol=lf
+*.plist text eol=lf
+*.yml text eol=lf
+*.dylib binary
+*.so binary
+*.icns binary

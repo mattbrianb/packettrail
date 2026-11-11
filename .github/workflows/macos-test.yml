@@ -1,0 +1,172 @@
+# Runs PacketTrail on a real Mac (GitHub's runner) and checks the things that can't
+# be tested from Windows: that nettop capture attributes traffic to apps and
+# remote IPs, that the app bundle has its icon, and that the window opens.
+# Screenshots and API output are kept as the "macos-test" artifact.
+#   - run it by hand from the Actions tab, or
+#   - push to the mac-test branch.
+name: macOS test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [mac-test]
+
+permissions:
+  contents: read
+
+jobs:
+  macos-test:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: System
+        run: |
+          sw_vers
+          uname -m
+          mkdir -p out
+
+      - name: What nettop prints here
+        run: |
+          (curl -s -o /dev/null https://speed.cloudflare.com/__down?bytes=3000000 &)
+          sleep 1
+          echo "--- the command PacketTrail runs"
+          nettop -L 1 -n -x -J bytes_in,bytes_out,re-tx,rtt_avg | head -n 25
+          echo "--- default columns"
+          nettop -L 1 -n -x | head -n 6
+          echo "--- how long one nettop run takes"
+          time (nettop -L 1 -n -x -J bytes_in,bytes_out,re-tx,rtt_avg > /dev/null)
+
+      - name: Unit tests
+        run: go test ./...
+
+      # Informational: real ping, traceroute and MTR as a normal user. It may
+      # fail where the runner's network blocks ICMP, so it never fails the job.
+      - name: Live ping and MTR (may be blocked here)
+        continue-on-error: true
+        timeout-minutes: 3
+        run: |
+          ping -c 3 1.1.1.1 || echo "ping is blocked on this runner"
+          PACKETTRAIL_LIVE=1 go test ./internal/tools/ -run 'EchoLive|MTRLive' -count=1 -v
+
+      - name: Build PacketTrail.app
+        run: |
+          chmod +x scripts/macos-app.sh
+          scripts/macos-app.sh 0.0.0-test
+
+      - name: Icon of the new build
+        run: |
+          case "$(uname -m)" in arm64) name=packettrail-macos-arm64 ;; *) name=packettrail-macos-x64 ;; esac
+          echo "APP=$PWD/dist/$name/$name/PacketTrail.app" >> "$GITHUB_ENV"
+          APP="$PWD/dist/$name/$name/PacketTrail.app"
+          sips -g pixelWidth -g pixelHeight "$APP/Contents/Resources/packettrail.icns"
+          swift scripts/appicon.swift "$APP" out/icon-new-build.png
+
+      - name: Capture attributes traffic to apps and IPs
+        run: |
+          "$APP/Contents/MacOS/packettrail" --headless --no-geoip-download --port 47901 --data "$RUNNER_TEMP/ngdata" > out/headless.log 2>&1 &
+          sleep 4
+          # one download that lasts about 6 s, so there is a known amount to find
+          curl -s -o /dev/null --limit-rate 1500k "https://speed.cloudflare.com/__down?bytes=9000000" || true
+          for i in 1 2 3; do
+            curl -s -o /dev/null "https://speed.cloudflare.com/__down?bytes=4000000" || true
+            sleep 1
+          done
+          sleep 3
+          curl -s http://127.0.0.1:47901/api/status > out/status.json
+          curl -s "http://127.0.0.1:47901/api/apps?period=live" > out/apps.json
+          curl -s "http://127.0.0.1:47901/api/ips?period=live" > out/ips.json
+          curl -s http://127.0.0.1:47901/api/system > out/system.json
+          pkill -x packettrail || true
+          echo "--- capture status"; jq '.capture' out/status.json
+          echo "--- apps: $(jq 'length' out/apps.json)"; jq -c '.[0:8][] | {name, in, out, ips}' out/apps.json || head -c 1200 out/apps.json
+          echo "--- ips: $(jq 'length' out/ips.json)"; jq -c '.[0:8][] | {ip, in, out, country, asn}' out/ips.json || head -c 1200 out/ips.json
+          echo "--- system"; head -c 600 out/system.json; echo
+          echo "--- log"; cat out/headless.log
+          test "$(jq 'length' out/apps.json)" -gt 0 || { echo "FAIL: no apps captured"; exit 1; }
+          test "$(jq 'length' out/ips.json)" -gt 0 || { echo "FAIL: no remote IPs captured"; exit 1; }
+          jq -e '[.[] | select(.name | test("curl"))] | length > 0' out/apps.json > /dev/null || { echo "FAIL: curl's download was not attributed to curl"; exit 1; }
+          got="$(jq '[.[] | select(.name | test("curl")) | .in] | add' out/apps.json)"
+          echo "curl downloaded 9 MB slowly plus 12 MB quickly; PacketTrail counted $got bytes for curl"
+          test "$got" -gt 6000000 || { echo "FAIL: less than 6 MB of the 9 MB slow download was counted"; exit 1; }
+
+      # Drives the real page in WKWebView: Safari's engine once threw the
+      # scroll position away on every refresh (Chrome's never did).
+      - name: Scrolling holds while a test runs (WebKit)
+        timeout-minutes: 4
+        run: |
+          "$APP/Contents/MacOS/packettrail" --headless --no-geoip-download --port 47902 --data "$RUNNER_TEMP/ngdata2" > out/headless-scroll.log 2>&1 &
+          curl -s -o /dev/null --limit-rate 30k "https://speed.cloudflare.com/__down?bytes=30000000" &
+          curl -s -o /dev/null --limit-rate 12k -L "https://github.com/git/git/archive/refs/heads/master.zip" &
+          curl -s -o /dev/null --limit-rate 20k "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.1.tar.xz" &
+          sleep 6
+          go run ./tools/wvrun -lib "internal/platform/webviewlib/darwin_$(go env GOARCH)" \
+            -url "http://127.0.0.1:47902/?notour" -init tools/wvrun/scroll-test.js -timeout 80s | tee out/scroll-test.txt
+          pkill -x packettrail || true
+          pkill -x curl || true
+          grep -q "RESULT: scroll held" out/scroll-test.txt || { echo "FAIL: the scroll position did not hold in WebKit"; exit 1; }
+
+      # The website picks the download from what the browser says about the
+      # system (docs/os.js). Safari's engine on a real Mac must get macOS.
+      - name: The website offers the macOS download (WebKit)
+        timeout-minutes: 3
+        run: |
+          go run ./tools/wvrun -lib "internal/platform/webviewlib/darwin_$(go env GOARCH)" \
+            -dir docs -page "index.html?still" -init tools/wvrun/os-test.js -timeout 40s | tee out/os-test.txt
+          grep -q "RESULT: macos" out/os-test.txt || { echo "FAIL: the website did not offer the macOS download on a Mac"; exit 1; }
+
+      - name: The window opens (screenshot)
+        run: |
+          open "$APP" --args --no-geoip-download
+          sleep 15
+          screencapture -x out/window-new-build.png || echo "screencapture failed"
+          pgrep -lx packettrail || echo "packettrail is not running"
+          cat "$HOME/Library/Application Support/packettrail/packettrail.log" || true
+          pkill -x packettrail || true
+          sleep 2
+
+      - name: Released version, as a browser download (quarantined)
+        continue-on-error: true
+        timeout-minutes: 3
+        run: |
+          case "$(uname -m)" in arm64) name=packettrail-macos-arm64 ;; *) name=packettrail-macos-x64 ;; esac
+          curl -fsSL -o "$RUNNER_TEMP/rel.zip" "https://github.com/mattbrianb/packettrail/releases/latest/download/$name.zip"
+          ditto -x -k "$RUNNER_TEMP/rel.zip" "$RUNNER_TEMP/rel"
+          REL="$RUNNER_TEMP/rel/$name/PacketTrail.app"
+          echo "--- is the released icon file valid?"
+          iconutil -c iconset "$REL/Contents/Resources/packettrail.icns" -o "$RUNNER_TEMP/rel.iconset" && ls -la "$RUNNER_TEMP/rel.iconset" || echo "ICONUTIL REJECTED THE RELEASED ICON"
+          swift scripts/appicon.swift "$REL" out/icon-released.png
+          echo "--- Gatekeeper's verdict"
+          spctl --assess --type execute -vv "$REL" || true
+          # what a visitor sees after downloading with a browser
+          xattr -w com.apple.quarantine "0083;$(printf '%x' "$(date +%s)");Safari;" "$REL"
+          # "open" waits for the Gatekeeper dialog, so it must not block the step
+          (open "$REL" > /dev/null 2>&1 &)
+          sleep 12
+          screencapture -x out/gatekeeper-prompt.png || true
+          pkill -x packettrail || true
+
+      - name: Terminal installer (no quarantine)
+        continue-on-error: true
+        timeout-minutes: 4
+        run: |
+          PACKETTRAIL_NO_OPEN=1 bash docs/install.sh
+          xattr -l /Applications/PacketTrail.app || true
+          echo "quarantine attribute: $(xattr -p com.apple.quarantine /Applications/PacketTrail.app 2>/dev/null || echo none)"
+          open /Applications/PacketTrail.app --args --no-geoip-download
+          sleep 12
+          screencapture -x out/window-installed.png || true
+          pgrep -lx packettrail && echo "installed copy opened without a prompt" || echo "installed copy is NOT running"
+          pkill -x packettrail || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-test
+          path: out/

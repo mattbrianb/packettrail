@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>PacketTrail</title>
+<script>
+  // Apply the saved appearance before first paint (no flash of the wrong theme).
+  try { var t = JSON.parse(localStorage.getItem('pt.theme') || '"system"'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="chrome glass">
+  <div class="brand">
+    <span class="app-mark" aria-hidden="true">
+      <svg viewBox="0 0 160 160" width="100%" height="100%"><rect x="1" y="1" width="158" height="158" rx="36" fill="#17181c" stroke="#34363e" stroke-width="2"/><path d="M43 120V86q0-10 10-10h48q19 0 19-19t-19-19H76" fill="none" stroke="#f2f2f4" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="120" r="9" fill="#f2f2f4"/><rect x="61" y="23" width="30" height="30" rx="8" fill="#43afff"/><circle cx="73" cy="76" r="8" fill="#ff9a52"/></svg>
+    </span>
+    <div class="brand-text">
+      <span class="brand-name">PacketTrail</span>
+      <span class="host" id="host"></span>
+    </div>
+  </div>
+  <div class="status" id="status" data-state="idle">
+    <span class="status-dot" aria-hidden="true"></span>
+    <span class="status-text" id="statusText">Connecting…</span>
+    <button type="button" class="status-action" id="elevateBtn" hidden>Restart as administrator</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="seg" id="periodSeg" role="radiogroup" aria-label="Time period">
+    <span class="seg-thumb" aria-hidden="true"></span>
+    <button type="button" role="radio" data-value="session" title="This session, live">Live</button>
+    <button type="button" role="radio" data-value="1h" title="Last hour">1H</button>
+    <button type="button" role="radio" data-value="24h" title="Last 24 hours">24H</button>
+    <button type="button" role="radio" data-value="7d" title="Last 7 days">7D</button>
+    <button type="button" role="radio" data-value="30d" title="Last 30 days">30D</button>
+    <button type="button" role="radio" data-value="all" title="All history">All</button>
+  </div>
+  <div class="seg" id="unitSeg" role="radiogroup" aria-label="Rate units">
+    <span class="seg-thumb" aria-hidden="true"></span>
+    <button type="button" role="radio" data-value="bits" title="Bits per second">bps</button>
+    <button type="button" role="radio" data-value="bytes" title="Bytes per second">B/s</button>
+  </div>
+  <div class="seg icons" id="themeSeg" role="radiogroup" aria-label="Appearance">
+    <span class="seg-thumb" aria-hidden="true"></span>
+    <button type="button" role="radio" data-value="system" title="Match system appearance" aria-label="Match system appearance">
+      <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="1.75" y="2.75" width="12.5" height="8.5" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 13.75h5M8 11.25v2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </button>
+    <button type="button" role="radio" data-value="light" title="Light appearance" aria-label="Light appearance">
+      <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="8" r="2.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.5v1.4M8 13.1v1.4M1.5 8h1.4M13.1 8h1.4M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </button>
+    <button type="button" role="radio" data-value="dark" title="Dark appearance" aria-label="Dark appearance">
+      <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M13.2 9.9A5.6 5.6 0 0 1 6.1 2.8a5.6 5.6 0 1 0 7.1 7.1Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <button type="button" class="icon-btn" id="helpBtn" title="Help (F1)" aria-label="Help">
+    <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="10" cy="10" r="7.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7.7 7.9a2.4 2.4 0 1 1 3.4 2.2c-.7.3-1.1.9-1.1 1.6v.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14.3" r="0.95" fill="currentColor"/></svg>
+  </button>
+  <button type="button" class="icon-btn" id="settingsBtn" title="Status and settings" aria-label="Status and settings">
+    <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M10 12.6a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Z M16.1 11.3a6.3 6.3 0 0 0 0-2.6l1.6-1.3-1.6-2.8-1.9.8a6.2 6.2 0 0 0-2.3-1.3L11.6 2H8.4l-.3 2.1a6.2 6.2 0 0 0-2.3 1.3l-1.9-.8-1.6 2.8 1.6 1.3a6.3 6.3 0 0 0 0 2.6l-1.6 1.3 1.6 2.8 1.9-.8a6.2 6.2 0 0 0 2.3 1.3l.3 2.1h3.2l.3-2.1a6.2 6.2 0 0 0 2.3-1.3l1.9.8 1.6-2.8Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<section class="hero card" aria-label="Machine-wide traffic">
+    <div class="metrics">
+      <div class="metric rx">
+        <span class="m-label"><i class="dot" aria-hidden="true"></i>Download</span>
+        <span class="m-value" id="rateIn">–</span>
+        <span class="m-sub" id="totIn">&nbsp;</span>
+      </div>
+      <div class="metric tx">
+        <span class="m-label"><i class="dot" aria-hidden="true"></i>Upload</span>
+        <span class="m-value" id="rateOut">–</span>
+        <span class="m-sub" id="totOut">&nbsp;</span>
+      </div>
+    </div>
+  <div class="chart-wrap hero-chart">
+    <div class="mon-chips" id="monChips" aria-label="Monitors"></div>
+    <h2 class="chart-title" id="chartTitle">Live · last 5 minutes</h2>
+    <canvas id="mainChart" height="112"></canvas>
+    <div class="chart-tip" id="mainTip"></div>
+  </div>
+</section>
+
+<div class="viewbar">
+  <div class="seg tabs" id="tabSeg" role="tablist" aria-label="View">
+    <span class="seg-thumb" aria-hidden="true"></span>
+    <button type="button" role="tab" data-tab="apps">Applications</button>
+    <button type="button" role="tab" data-tab="ips">Remote IPs</button>
+    <button type="button" role="tab" data-tab="asns">Networks</button>
+    <button type="button" role="tab" data-tab="peering">Peering</button>
+    <button type="button" role="tab" data-tab="monitors">Monitors</button>
+    <button type="button" role="tab" data-tab="tools">Tools</button>
+    <button type="button" role="tab" data-tab="system">System</button>
+  </div>
+</div>
+
+<main>
+  <section class="tab" id="tab-apps">
+    <div class="card panel">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" class="filter" placeholder="Search applications" aria-label="Search applications" data-table="apps">
+        </label>
+        <span class="count" id="count-apps"></span>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-export="apps"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <div class="scroll" id="wrap-apps"><table id="t-apps"></table></div>
+    </div>
+    <aside class="card sheet-panel" id="detail" aria-label="Application details" aria-hidden="true">
+      <div id="detailBody">
+        <div class="detail-head">
+          <div class="dh-left">
+            <span class="appicon lg" id="dIcon"></span>
+            <div class="dh-text">
+              <h3 id="dName"></h3>
+              <div class="sub" id="dSub"></div>
+            </div>
+          </div>
+          <div class="dh-right">
+            <div class="legend"><span class="key rx"></span>Download<span class="key tx"></span>Upload</div>
+            <button type="button" class="icon-btn" id="detailClose" title="Close (Esc)" aria-label="Close details">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="xkpis app-kpis" id="appKpis"></div>
+        <div class="chart-wrap small">
+          <canvas id="appChart" height="110"></canvas>
+          <div class="chart-tip" id="appTip"></div>
+        </div>
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="search" class="filter" placeholder="Search IPs, hosts, countries, ASNs" aria-label="Search this application's endpoints" data-table="flows">
+          </label>
+          <span class="count" id="count-flows"></span>
+          <div class="spacer"></div>
+          <button type="button" class="btn" data-export="flows"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+        </div>
+        <div class="scroll" id="wrap-flows"><table id="t-flows"></table></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="tab" id="tab-ips" hidden>
+    <div class="card panel full">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" class="filter" placeholder="Search IPs, hosts, apps, countries, ASNs" aria-label="Search remote IPs" data-table="ips">
+        </label>
+        <label class="switch"><input type="checkbox" id="hidePrivate" role="switch"><span>Hide LAN &amp; private</span></label>
+        <span class="count" id="count-ips"></span>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-export="ips"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <div class="scroll" id="wrap-ips"><table id="t-ips"></table></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-asns" hidden>
+    <div class="card panel full">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" class="filter" placeholder="Search networks, organisations, countries, apps" aria-label="Search networks" data-table="asns">
+        </label>
+        <span class="count" id="count-asns"></span>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-export="asns"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <div class="scroll" id="wrap-asns"><table id="t-asns"></table></div>
+    </div>
+  </section>
+  <section class="tab" id="tab-peering" hidden>
+    <div class="peer-top">
+      <div class="card peer-own" id="peerOwn"></div>
+      <div class="card peer-mix" id="peerMix"></div>
+    </div>
+    <div class="card panel full">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" class="filter" placeholder="Search networks, policies, exchanges" aria-label="Search networks" data-table="peers">
+        </label>
+        <span class="count" id="count-peers"></span>
+        <div class="spacer"></div>
+        <span class="count" id="pdbNote"></span>
+        <button type="button" class="btn" id="routeOpen" title="Trace the routes to your top networks and draw them as a tree">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="3" cy="8" r="1.8" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="3.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="12.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4.7 7.3 11.3 4.2M4.7 8.7l6.6 3.1" stroke="currentColor" stroke-width="1.4"/></svg>Route map</button>
+        <button type="button" class="btn" data-export="peers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <p class="table-note" id="peerExplain"></p>
+      <div class="scroll" id="wrap-peers"><table id="t-peers"></table></div>
+    </div>
+    <aside class="card sheet-panel" id="routeSheet" aria-label="Route map" aria-hidden="true">
+      <div class="detail-head">
+        <div class="dh-left">
+          <span class="appicon lg route-ic" aria-hidden="true"><svg viewBox="0 0 16 16" width="20" height="20"><circle cx="3" cy="8" r="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="3.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="12.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4.7 7.3 11.3 4.2M4.7 8.7l6.6 3.1" stroke="currentColor" stroke-width="1.3"/></svg></span>
+          <div class="dh-text">
+            <h3>Route map</h3>
+            <div class="sub route-sub">Paths from this PC to the busiest IP of each of your top 8 networks, merged into one tree</div>
+          </div>
+        </div>
+        <div class="dh-right">
+          <span class="count" id="routeStatus"></span>
+          <button type="button" class="btn primary sm" id="routeRun">Map routes</button>
+          <button type="button" class="icon-btn" id="routeClose" title="Close (Esc)" aria-label="Close route map">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="scroll route-scroll"><div class="route-body" id="routeBody"></div></div>
+    </aside>
+  </section>
+
+  <section class="tab" id="tab-monitors" hidden>
+    <div class="card panel full">
+      <div class="toolbar mon-add">
+        <label class="search mon-target-field">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M1.5 8h3l2-5 3 10 2-5h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="monTarget" placeholder="IP address or hostname to monitor" aria-label="Monitor target" autocomplete="off" spellcheck="false">
+        </label>
+        <input id="monName" class="field" placeholder="Name (optional)" aria-label="Monitor name" autocomplete="off">
+        <div class="seg sm" id="monMethod" role="radiogroup" aria-label="Probe method">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" role="radio" data-value="icmp">Ping</button>
+          <button type="button" role="radio" data-value="tcp">TCP</button>
+        </div>
+        <label class="port-field" id="monPortField" hidden><span>Port</span><input id="monPort" type="number" value="443" min="1" max="65535" aria-label="TCP port"></label>
+        <span class="seg-label">Every</span>
+        <div class="seg sm" id="monInterval" role="radiogroup" aria-label="Probe interval">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" role="radio" data-value="1">1 s</button>
+          <button type="button" role="radio" data-value="2">2 s</button>
+          <button type="button" role="radio" data-value="5">5 s</button>
+          <button type="button" role="radio" data-value="10">10 s</button>
+          <button type="button" role="radio" data-value="30">30 s</button>
+        </div>
+        <button type="button" class="btn primary sm" id="monAdd">Add monitor</button>
+      </div>
+      <div class="mon-bar" id="monBar" hidden>
+        <div class="mon-suggest" id="monSuggest"></div>
+        <span class="mon-count" id="monCount"></span>
+        <button type="button" class="btn sm" id="monAll" hidden></button>
+      </div>
+      <div class="scroll mon-list" id="monList">
+        <div class="empty" id="monEmpty">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2 12h4l3-7 4 14 3-7h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><strong>No monitors yet</strong><span>Add your gateway, DNS servers or any host to track latency and loss continuously, even while you look at other tabs.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-tools" hidden>
+    <div class="card panel full">
+      <form class="toolbar tool-bar" id="toolForm" autocomplete="off">
+        <label class="search tool-target-field">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input id="toolTarget" placeholder="IP address or hostname, e.g. 8.8.8.8 or example.com" aria-label="IP address or hostname to test" spellcheck="false" enterkeyhint="go">
+        </label>
+        <button type="submit" class="btn primary sm" id="toolGo">Test</button>
+        <span class="tool-note" id="toolNote">Starts your last-used test. Switch between MTR, traceroute, ping and TCP below.</span>
+      </form>
+      <div class="mon-bar" id="toolRecent" hidden></div>
+      <div class="scroll tool-body">
+        <div class="empty" id="toolEmpty">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2 12h4l3-7 4 14 3-7h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><strong>Test any IP address or hostname</strong><span>Run MTR, traceroute, ping or a TCP port check to any destination, not only ones this PC has talked to. You also get its location, network, reverse DNS and any traffic this PC has had with it.</span></div>
+        </div>
+        <div class="tool-resolved" id="toolResolved" hidden></div>
+        <div class="xpanel tool-panel" id="toolPanel" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-system" hidden>
+    <div class="empty card" id="sysStatus" hidden>
+      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><strong>Taking the first readings…</strong><span>System figures appear after a couple of seconds.</span></div>
+    </div>
+    <div class="sys-tiles">
+      <div class="card sys-tile" id="tileCpu"><span class="st-label"><i class="sw" style="background:var(--rx)"></i>CPU</span><span class="st-val">–</span><span class="st-sub">&nbsp;</span><canvas height="36"></canvas></div>
+      <div class="card sys-tile" id="tileMem"><span class="st-label"><i class="sw" style="background:var(--s3)"></i>Memory</span><span class="st-val">–</span><span class="st-sub">&nbsp;</span><canvas height="36"></canvas></div>
+      <div class="card sys-tile" id="tileDisk"><span class="st-label"><i class="sw" style="background:var(--tx)"></i>Disk activity</span><span class="st-val">–</span><span class="st-sub">&nbsp;</span><canvas height="36"></canvas></div>
+      <div class="card sys-tile" id="tileTcp"><span class="st-label"><i class="sw" style="background:var(--s4)"></i>TCP retransmits</span><span class="st-val">–</span><span class="st-sub">&nbsp;</span><canvas height="36"></canvas></div>
+    </div>
+    <div class="sys-row">
+      <div class="card sys-card" id="sysHints"></div>
+      <div class="card sys-card">
+        <div class="card-label sys-label"><span>Last 15 minutes</span>
+          <span class="sys-legend"><span class="mix-leg"><span class="sw" style="background:var(--rx)"></span>CPU</span><span class="mix-leg"><span class="sw" style="background:var(--s3)"></span>Memory</span><span class="mix-leg"><span class="sw" style="background:var(--tx)"></span>Disk busy</span></span>
+        </div>
+        <div class="chart-wrap"><canvas id="sysChart" height="168"></canvas><div class="chart-tip" id="sysTip"></div></div>
+      </div>
+    </div>
+    <div class="sys-row b">
+      <div class="card sys-card" id="sysCpu"></div>
+      <div class="card sys-card" id="sysStack"></div>
+    </div>
+    <div class="card panel sys-panel">
+      <div class="toolbar">
+        <span class="panel-title">Network adapters</span>
+        <span class="count" id="count-ifaces"></span>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-export="ifaces"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <div class="scroll" id="wrap-ifaces"><table id="t-ifaces"></table></div>
+    </div>
+    <div class="card panel sys-panel">
+      <div class="toolbar">
+        <span class="panel-title">Disks</span>
+        <span class="count" id="count-disks"></span>
+      </div>
+      <div class="scroll" id="wrap-disks"><table id="t-disks"></table></div>
+    </div>
+    <div class="card panel sys-panel">
+      <div class="toolbar">
+        <span class="panel-title">Processes</span>
+        <label class="search">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" class="filter" placeholder="Search processes" aria-label="Search processes" data-table="procs">
+        </label>
+        <span class="count" id="count-procs"></span>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-export="procs"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v7.5M5 7l3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+      </div>
+      <div class="scroll procs-scroll" id="wrap-procs"><table id="t-procs"></table></div>
+    </div>
+  </section>
+</main>
+
+<aside class="card sheet-panel inspector" id="inspector" aria-label="Details" aria-hidden="true">
+  <button type="button" class="icon-btn insp-close" id="inspClose" title="Close (Esc)" aria-label="Close details">
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+  </button>
+  <div class="insp-body scroll" id="inspBody"></div>
+</aside>
+
+<footer class="foot">
+  <span id="footData"></span>
+  <span class="spacer"></span>
+  <span id="footGeo"></span>
+  <a href="#" data-link="https://db-ip.com">IP Geolocation by DB-IP</a>
+</footer>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <form method="dialog" class="sheet">
+    <div class="sheet-head">
+      <h3 id="settingsTitle">Status &amp; settings</h3>
+      <button class="icon-btn plain" value="close" aria-label="Close">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="group-label">Capture</div>
+    <dl class="group" id="statusList"></dl>
+    <div class="group-label">Storage</div>
+    <dl class="group" id="storageList"></dl>
+    <div class="group-label">GeoIP &amp; ASN databases</div>
+    <div class="group">
+      <div class="row">
+        <div class="row-main">
+          <span id="geoStatus"></span>
+          <span class="row-note">Offline DB-IP Lite databases, free for commercial use with attribution. MaxMind GeoLite2 <code>.mmdb</code> files in the data folder are used if the DB-IP files are missing.</span>
+        </div>
+        <button type="button" class="btn primary" id="geoUpdate">Download latest</button>
+      </div>
+    </div>
+    <div id="notesBox" hidden>
+      <div class="group-label">Capture notes</div>
+      <div class="group"><ul class="notes" id="notes"></ul></div>
+    </div>
+    <div class="group-label">Appearance</div>
+    <div class="group">
+      <div class="row">
+        <div class="row-main">
+          <span>Data colours</span>
+          <span class="row-note">Colours every chart and data bar: download (first colour) and upload, plus two matching colours for memory and TCP on the System tab (the dots show all four). Buttons stay blue, and status dots and loss figures always stay green, yellow and red. Blue &amp; orange is the easiest set for colour-blind viewers; green &amp; red the hardest.</span>
+        </div>
+      </div>
+      <div class="pal-grid" id="paletteGrid" role="radiogroup" aria-label="Traffic colours"></div>
+      <div class="pal-custom" id="palCustom" hidden>
+        <label class="pc-field"><span><i class="pc-dir">↓</i> Download</span><input type="color" id="pcRx" aria-label="Download colour"><input class="field pc-hex" id="pcRxHex" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Download colour, hex code"></label>
+        <label class="pc-field"><span><i class="pc-dir">↑</i> Upload</span><input type="color" id="pcTx" aria-label="Upload colour"><input class="field pc-hex" id="pcTxHex" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Upload colour, hex code"></label>
+        <span class="pc-note" id="pcNote" role="status"></span>
+      </div>
+      <div class="row row-sep">
+        <div class="row-main">
+          <span>Glow in dark mode</span>
+          <span class="row-note">A soft halo around chart lines and status dots.</span>
+        </div>
+        <label class="switch"><input type="checkbox" id="glowToggle" role="switch" aria-label="Glow in dark mode"></label>
+      </div>
+    </div>
+    <div class="group-label">About</div>
+    <div class="group about">
+      <span class="app-mark about-mark" aria-hidden="true">
+        <svg viewBox="0 0 160 160" width="100%" height="100%"><rect x="1" y="1" width="158" height="158" rx="36" fill="#17181c" stroke="#34363e" stroke-width="2"/><path d="M43 120V86q0-10 10-10h48q19 0 19-19t-19-19H76" fill="none" stroke="#f2f2f4" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="120" r="9" fill="#f2f2f4"/><rect x="61" y="23" width="30" height="30" rx="8" fill="#43afff"/><circle cx="73" cy="76" r="8" fill="#ff9a52"/></svg>
+      </span>
+      <div class="about-text">
+        <strong>PacketTrail</strong>
+        <span id="aboutVersion"></span>
+        <span id="aboutCopy">© 2026 Matt Burnett</span>
+      </div>
+    </div>
+    <p class="credits">IP geolocation by <a href="#" data-link="https://db-ip.com">DB-IP</a>. Country flags from <a href="#" data-link="https://github.com/jdecked/twemoji">Twemoji</a> via the Twemoji Country Flags font (TalkJS, MIT); graphics licensed <a href="#" data-link="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+  </form>
+</dialog>
+
+<dialog id="help" class="help-dialog" aria-labelledby="helpTitle">
+  <div class="help-head">
+    <h3 id="helpTitle">Help</h3>
+    <span class="spacer"></span>
+    <button type="button" class="btn sm" id="tourStart">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>Take the tour</button>
+    <button type="button" class="icon-btn plain" id="helpClose" aria-label="Close help">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="help-body">
+    <nav class="help-nav" id="helpNav" aria-label="Help topics">
+      <button type="button" data-help="start">Getting started</button>
+      <button type="button" data-help="views">The views</button>
+      <button type="button" data-help="numbers">Reading the numbers</button>
+      <button type="button" data-help="diag">Diagnostics</button>
+      <button type="button" data-help="keys">Keyboard shortcuts</button>
+      <button type="button" data-help="privacy">What leaves this PC</button>
+      <button type="button" data-help="trouble">Troubleshooting</button>
+      <button type="button" data-help="about">About</button>
+    </nav>
+    <div class="help-content scroll" id="helpContent">
+      <section id="help-start">
+        <h4>Getting started</h4>
+        <p>PacketTrail shows which apps on this PC talk to which addresses on the network, how much data each one moves, and who owns those addresses.</p>
+        <ul>
+          <li><b>Run it as administrator</b> on Windows for byte counts, RTT and Loss ↓. Without admin rights it runs in <i>connections only</i> mode: you see who talks to whom, but not how much. The status pill at the top left shows the mode and offers <i>Restart as administrator</i>.</li>
+          <li><b>Live or history:</b> <i>Live</i> shows this session. <i>1H</i> to <i>All</i> read the stored history, which is kept for 90 days in the <code>data</code> folder next to the app. Every table and chart follows this choice.</li>
+          <li><b>Units and appearance:</b> <i>bps</i> or <i>B/s</i> for rates, and the three icons for system, light or dark appearance.</li>
+          <li><b>Copying:</b> every IP, hostname, prefix and ASN has a copy button, and each detail panel has <i>Copy details</i>. Tables don't refresh while you have text selected.</li>
+          <li><b>Exporting:</b> <i>Export CSV</i> saves the current table, with your sort and search applied, to your Downloads folder.</li>
+        </ul>
+      </section>
+      <section id="help-views">
+        <h4>The views</h4>
+        <dl class="help-dl">
+          <dt>Applications</dt><dd>Every app with traffic. Click an app to open its details on the right: its chart and every remote IP and port it used. Click it again, click anywhere outside the panel, or press Esc to close it.</dd>
+          <dt>Remote IPs</dt><dd>Every remote address, with location, network (ASN), hostname and path quality. Click a row to open its details in the panel on the right, with diagnostics. Click another row to switch, or anywhere outside the panel to close it. <i>Hide LAN &amp; private</i> hides local addresses.</dd>
+          <dt>Networks</dt><dd>Traffic per network operator (ASN). Click one to see, on the right, which of its prefixes and IPs carry your traffic.</dd>
+          <dt>Peering</dt><dd>Your busiest networks matched against PeeringDB: their peering policy and the internet exchanges you share. <i>Route map</i> traces the path to your top 8 networks and shows where each one leaves your network.</dd>
+          <dt>Monitors</dt><dd>Continuous ping or TCP checks to hosts you choose, such as your gateway or DNS servers, with loss and latency history. They keep running while you use other tabs. <i>Pause all</i> stops them without losing history.</dd>
+          <dt>Tools</dt><dd>MTR, traceroute, ping or a TCP port check to any IP address or hostname, including ones this PC hasn't talked to.</dd>
+          <dt>System</dt><dd>CPU, memory, disks, network adapters, the TCP/IP stack and processes, with a list of things worth checking. Use it to rule the PC in or out when the network seems slow.</dd>
+        </dl>
+      </section>
+      <section id="help-numbers">
+        <h4>Reading the numbers</h4>
+        <dl class="help-dl">
+          <dt>↓ Rate, ↑ Rate</dt><dd>Current download and upload speed.</dd>
+          <dt>Total rate</dt><dd>Download and upload combined. Click its header to sort by it: whatever is using the most bandwidth right now moves to the top as rates change, so you can catch a bandwidth hog in the act.</dd>
+          <dt>Downloaded, Uploaded</dt><dd>Data moved in the selected period. These count payload only, so they read a few percent below router or interface counters.</dd>
+          <dt>RTT</dt><dd>Average TCP round-trip time, measured by the operating system on your real connections. No probes are sent.</dd>
+          <dt>Loss ↓ (est.)</dt><dd>Download side: the share of received data where your PC noticed a gap, meaning packets were lost or reordered on the way to you. Yellow above 0.5%, red above 2%. Windows in admin mode only.</dd>
+          <dt>Retrans ↑</dt><dd>Upload side: the share of sent data TCP had to send again. Yellow above 1%, red above 5%.</dd>
+          <dt>Port</dt><dd><code>→ 443</code> means this PC connected out to remote port 443. <code>← 3389</code> means another host connected in to local port 3389.</dd>
+          <dt>Share</dt><dd>On the Peering tab: a network's part of all the traffic this PC exchanged with networks outside your own (off-net) in the selected period. Your own network (on-net) and LAN traffic aren't counted. A high share with no shared exchange is where peering would help most.</dd>
+          <dt>A dash (–)</dt><dd>Nothing measured yet. It is not the same as zero.</dd>
+        </dl>
+      </section>
+      <section id="help-diag">
+        <h4>Diagnostics</h4>
+        <p>Open them from any IP's details panel, from the <i>Tools</i> tab, or with the MTR button on a monitor card.</p>
+        <ul>
+          <li><b>MTR</b> probes every hop each second and builds loss and latency statistics per hop. Loss at a middle hop that doesn't continue to the later hops usually just means that router answers probes slowly; it is not real loss.</li>
+          <li><b>Traceroute</b> maps the path once.</li>
+          <li><b>Ping</b> shows loss, latency and jitter. <b>TCP port</b> times the connection handshake instead, for hosts that block ping.</li>
+          <li>The <b>path diagram</b> above MTR and traceroute results groups hops by network: your LAN, your ISP, internet exchanges and the destination. Private addresses are your LAN only until the path leaves it; later ones are a provider's routers, shown inside the network around them or as <i>Private IPs</i>.</li>
+          <li><i>Copy results</i> gives an mtr-style text report for tickets and chats. <i>Monitor</i> keeps testing the address in the background.</li>
+          <li>Up to four tests can run at once, and each stops after 15 minutes.</li>
+        </ul>
+      </section>
+      <section id="help-keys">
+        <h4>Keyboard shortcuts</h4>
+        <dl class="help-dl keys">
+          <dt><kbd>F1</kbd></dt><dd>Open this help</dd>
+          <dt><kbd>/</kbd></dt><dd>Search the current table</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Close the details panel or dialog (clicking outside it works too)</dd>
+          <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Move between options in a button group, such as the tabs or the period</dd>
+          <dt><kbd>Enter</kbd></dt><dd>In the Tools field: start the test</dd>
+        </dl>
+      </section>
+      <section id="help-privacy">
+        <h4>What leaves this PC</h4>
+        <p>Location and network lookups use offline databases stored in the data folder. Only these go out:</p>
+        <ul>
+          <li>Reverse-DNS queries to your normal DNS server.</li>
+          <li>Anonymous PeeringDB lookups by AS number, on the Peering tab.</li>
+          <li>The probes you start: diagnostics, monitors and the route map. ISP detection also sends a few pings towards 1.1.1.1, at most every 6 hours.</li>
+          <li>The free DB-IP Lite GeoIP databases: downloaded once on first start, then only when you click <i>Download latest</i> in Settings.</li>
+        </ul>
+        <p>History, settings and test results stay on this PC.</p>
+      </section>
+      <section id="help-trouble">
+        <h4>Troubleshooting</h4>
+        <dl class="help-dl">
+          <dt>“Connections only · no byte counts”</dt><dd>The app isn't running as administrator. Click <i>Restart as administrator</i> in the status pill.</dd>
+          <dt>Windows SmartScreen or an antivirus warns about the app</dt><dd>PacketTrail isn't code-signed, so Windows can't show a verified publisher. On a new PC, SmartScreen may say “Windows protected your PC”: click <i>More info</i>, then <i>Run anyway</i>. If an antivirus quarantines it, restore the file and report it as a false positive to that vendor. Only allow it if you got the file from someone you trust. Compare its SHA-256 with <code>SHA256SUMS.txt</code> to be sure it's unchanged.</dd>
+          <dt>RTT or Loss ↓ show dashes</dt><dd>They need admin rights, and they only exist for TCP. Browsers often use QUIC (UDP) for Google and YouTube, which has no TCP figures.</dd>
+          <dt>Peering says “Looking up…”</dt><dd>PeeringDB limits anonymous lookups, so results arrive in batches every few seconds. The note above the table says when PeeringDB asked the app to wait.</dd>
+          <dt>An app shows no traffic</dt><dd>Check the period: <i>Live</i> only covers this session. Apps that only talk to this PC itself are hidden unless the app was started with <code>--loopback</code>.</dd>
+          <dt>The network feels slow but the line looks fine</dt><dd>Open the <i>System</i> tab. High DPC or interrupt time, a pinned CPU core, adapter errors, or Ethernet stuck at 100 Mbit/s all point at the PC rather than the network.</dd>
+        </dl>
+      </section>
+      <section id="help-about">
+        <h4>About</h4>
+        <p><b>PacketTrail</b> <span id="helpVersion"></span><br><span id="helpCopy">© 2026 Matt Burnett</span></p>
+        <p>The full manual is <code>README.md</code> in the app's folder. Settings shows the capture status, storage and GeoIP databases.</p>
+      </section>
+    </div>
+  </div>
+</dialog>
+
+<div class="tour" id="tour" hidden>
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-card" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <div class="tour-step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-actions">
+      <button type="button" class="tour-skip" id="tourSkip">Skip tour</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn sm" id="tourBack">Back</button>
+      <button type="button" class="btn primary sm" id="tourNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg class="toast-ic" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span id="toastText"></span>
+  <button type="button" class="btn" id="toastAction" hidden></button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

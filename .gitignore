@@ -1,0 +1,18 @@
+# Local Go toolchain and module cache (build.ps1 downloads or uses it)
+.toolchain/
+
+# Build output and the app's runtime data: history database, browser
+# profile, logs and GeoIP databases. Releases are published on GitHub.
+dist/
+data/
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.mmdb
+*.mmdb.download
+
+# Editor and design-tool caches
+.impeccable/
+.vscode/
+.idea/

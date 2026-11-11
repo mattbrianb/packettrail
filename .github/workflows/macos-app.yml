@@ -1,0 +1,51 @@
+# Builds the signed (ad-hoc) PacketTrail.app bundles on macOS and attaches them to
+# a GitHub release. The Windows and Linux files are built locally with
+# release.ps1; this adds the two macOS zips and their checksums.
+name: macOS app
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to attach the macOS apps to (e.g. v1.1.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  macos-app:
+    runs-on: macos-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build and sign PacketTrail.app
+        run: |
+          chmod +x scripts/macos-app.sh
+          scripts/macos-app.sh "${TAG#v}"
+
+      - name: Attach to the release
+        run: |
+          cd dist/release
+          gh release upload "$TAG" packettrail-macos-arm64.zip packettrail-macos-x64.zip --clobber
+          # add the two zips to SHA256SUMS.txt (replacing any older macOS lines)
+          gh release download "$TAG" --pattern SHA256SUMS.txt --dir sums || mkdir -p sums
+          touch sums/SHA256SUMS.txt
+          # (tr: the file must have Unix line endings, or "sha256sum -c" fails)
+          tr -d '\r' < sums/SHA256SUMS.txt | grep -v 'packettrail-macos-' > sums/new.txt || true
+          shasum -a 256 packettrail-macos-arm64.zip packettrail-macos-x64.zip >> sums/new.txt
+          sort -k2 sums/new.txt > SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --clobber
+          cat SHA256SUMS.txt
