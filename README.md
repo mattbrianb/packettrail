@@ -31,9 +31,8 @@ hostname the app actually looked up.
    [latest release](https://github.com/mattbrianb/packettrail/releases/latest)
    and extract it anywhere (USB stick, network share, `C:\Tools\...`). The app
    keeps its `data` folder next to `packettrail.exe`, so move them together.
-2. Double-click `packettrail.exe`. If Windows says "Windows protected your
-   PC", click **More info**, then **Run anyway** (see
-   [Antivirus, SmartScreen and trust](#antivirus-smartscreen-and-trust)).
+2. Double-click `packettrail.exe`. If Windows warns or blocks it, read
+   [Security warnings and trust](#security-warnings-and-trust) before proceeding.
 3. Windows shows a UAC prompt.
    - **Yes** gives full capture: bytes per app, per remote IP, TCP and UDP,
      plus DNS names.
@@ -57,49 +56,30 @@ packettrail.exe --selftest 20
 Browse a little while it runs. It prints the top apps and remote IPs with byte
 counts and saves the report as `data\selftest-*.txt`.
 
-## Antivirus, SmartScreen and trust
+## Security warnings and trust
 
-PacketTrail isn't code-signed, because that needs a paid certificate. It
-runs normally without one. This is what to expect, and what helps.
+PacketTrail's Windows executable is unsigned, and its macOS app is ad-hoc
+signed but not notarised. Some computers may warn or block it on first run.
+A successful run on the development PC does not establish that other
+computers will accept it.
 
-- **On the build PC:** Microsoft Defender scanned this build of
-  `packettrail.exe` and found no threats, and it has no record of ever
-  flagging PacketTrail. Other antivirus products were not tested.
-- **Why an antivirus might still flag it:** the app asks for admin rights,
-  reads kernel network events, lists processes and sends ping and traceroute
-  probes. Monitoring tools do all of these, but so does some malware, so
-  heuristic scanners sometimes flag tools like this. Unsigned Go programs
-  are also a common source of false positives.
-- **SmartScreen on other PCs:** a file downloaded from the internet, or
-  received by email or chat, carries a "came from the internet" mark. The
-  first run then shows "Windows protected your PC": click **More info**, then
-  **Run anyway**. To clear the mark before running, right-click the exe →
-  *Properties* → tick **Unblock** → *OK*, or run
-  `Unblock-File .\packettrail.exe`. A file copied from a USB stick doesn't
-  get the mark unless it already had it.
-- **Check a copy is genuine:** the build writes `SHA256SUMS.txt` next to the
-  executables. On the other PC, `Get-FileHash .\packettrail.exe` must show the
-  same SHA-256 as the line for `packettrail.exe`.
-- **If an antivirus blocks or quarantines it:**
-  1. Check the hash as above.
-  2. Report it as a false positive. It's free. For Microsoft Defender use
-     <https://www.microsoft.com/wdsi/filesubmission> (choose *Software
-     developer* for your own build). Other vendors have similar forms. Once
-     the vendor updates its definitions, usually within a few days, that
-     exact file is no longer flagged.
-  3. If you need it running before then, add an exclusion for the Net
-     Monitor folder in that antivirus. Do this only for a copy you trust: an
-     exclusion turns scanning off for everything in the folder.
-- **Keep one build per release:** Defender and SmartScreen reputation is tied
-  to the exact file, and every rebuild produces a different file that starts
-  from zero. Give everyone the same `packettrail.exe` and keep it until
-  there's a reason to change it.
-- **Why not a self-signed certificate:** it is only trusted on PCs where you
-  install that certificate as trusted, which is a security change on each PC.
-  It does nothing for SmartScreen or antivirus reputation anywhere else.
-- **The only free route to a real signature:** SignPath Foundation signs
-  open-source projects at no cost. That would mean publishing PacketTrail's
-  source on GitHub and building releases there.
+- **Download from the official release:** use the links above. Compare the
+  downloaded archive's SHA-256 with its entry in the release's
+  `SHA256SUMS.txt`. On Windows, for example, run
+  `Get-FileHash .\packettrail-windows-x64.zip -Algorithm SHA256`.
+  A matching checksum confirms the archive matches the published download;
+  it is not a security scan or a guarantee that the app is safe.
+- **First-run warnings:** the operating system may offer an option to approve
+  an unfamiliar app. Only proceed after checking the download's origin and
+  understanding the warning. Some policies do not permit an override.
+- **If security software blocks or quarantines it:** keep the detection
+  details and submit the file for review to your security software provider.
+  Do not assume a detection is a false positive or disable protection to
+  run the app. On a managed computer, ask your IT team to review it.
+- **Platform testing:** Windows has been tested by the publisher on the
+  development PC. Linux and macOS downloads are available, but real-device
+  testing of this release is still pending. Testing on a separate Windows
+  PC is also recommended before describing first-run behaviour as confirmed.
 
 ## Using the dashboard
 
@@ -490,11 +470,9 @@ Enrichment covers every public IP:
 
 ## Linux and macOS
 
-> **Lightly tested.** The Linux window has been run under WSL (Ubuntu 24.04).
-> The macOS app is built and run on GitHub's Mac (macOS 26, Apple silicon) by
-> the `macOS test` workflow: it checks that traffic is attributed to apps and
-> remote IPs, and that the window and icon appear. Neither has had the daily
-> use the Windows build has. Please report what you see.
+> **Testing pending.** Linux and macOS builds are available, but this release
+> still needs real-device testing. Successful builds do not confirm runtime
+> behaviour or warning-free launches on either platform.
 
 Both open the dashboard in **their own app window**, like on Windows, using
 the system's WebKit. If that can't start, PacketTrail uses a Chrome, Edge,
@@ -502,8 +480,7 @@ Chromium or Brave app window, and otherwise your default browser.
 
 **macOS, easiest:** paste this into Terminal. It downloads the right build,
 checks it against the release's SHA-256 checksum, puts **PacketTrail.app** in
-*Applications* and opens it. A copy fetched this way isn't quarantined, so
-macOS opens it without a security prompt:
+*Applications* and opens it. Review the script before running it. Security policy may still block the app:
 
 ```bash
 curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash
@@ -518,8 +495,7 @@ curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash
    Click **Done**, then open *System Settings → Privacy & Security*, scroll
    down and click **Open Anyway** next to PacketTrail. On macOS 14 and earlier you
    can instead right-click the app, choose **Open**, then **Open**.
-3. If your company's security software (e.g. Netskope, CrowdStrike) blocks it,
-   your IT team has to allow it.
+3. On a managed computer, your IT team may need to approve the app.
 
 Terminal alternative for step 2:
 `xattr -dr com.apple.quarantine /Applications/PacketTrail.app`. History and
@@ -568,7 +544,7 @@ Manager, in *Settings → About* and in `packettrail --version`.
 
 The executable is not code-signed, so Windows still shows "Unknown
 publisher" when it asks for administrator rights. See
-[Antivirus, SmartScreen and trust](#antivirus-smartscreen-and-trust).
+[Security warnings and trust](#security-warnings-and-trust).
 
 Third-party components:
 

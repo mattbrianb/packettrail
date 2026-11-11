@@ -43,7 +43,7 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 - **Platforms:** Windows 10/11 x64 is the primary target. Linux (x64, ARM64) and macOS (Apple silicon, Intel) builds ship but are untested on real machines.
 - **Lookups:** location and ASN come offline from the DB-IP Lite databases (CC BY 4.0), about 135 MB, downloaded once on first start.
 - **What leaves the PC:** reverse DNS to the user's own DNS server, anonymous PeeringDB lookups by AS number, the tests the user starts, and that GeoIP download.
-- **Signing:** the exe is not code-signed, so Windows SmartScreen may warn on first run.
+- **Signing:** the exe is not code-signed, so Windows may warn or block it on first run. The macOS app is ad-hoc signed but not notarised.
 - **Distribution:** the website is static HTML/CSS/JS on GitHub Pages from `docs/`, with no build step. Downloads are GitHub Releases with version-less asset names, linked as `releases/latest/download/<name>`.
 - **Cost:** no paid services, hosting or certificates.
 - **Licence:** MIT. Donations go through PayPal (paypal.me/matthewbrianburnett).
