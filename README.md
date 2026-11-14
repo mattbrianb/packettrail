@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.1.0 · MIT licence ·
+By Matthew Burnett · version 1.2.0 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -603,3 +603,8 @@ traffic. The same command checks the website at desktop and mobile sizes.
 ### Route geography
 
 MTR and traceroute offer Path and Map views. The map uses the installed City database and bundled Natural Earth outlines; it needs no account, map service or extra geolocation requests. Zoom, drag or use arrow keys to pan, and select a hop for its address, ASN, organisation, location, latency and loss. Live updates preserve the map view. Private, unanswered and unlocated hops stay unmapped. IP locations are approximate; connecting lines do not describe physical cables.
+
+
+Route geography also offers a rotatable Globe. Both views distinguish database estimates from inferred regions and unknown locations. A curated list recognises common anycast DNS addresses (it is not exhaustive); it never treats a whole ASN as anycast. Known anycast addresses do not receive precise pins.
+
+With at least three replies, a conservative distance/round-trip-time check flags coordinates that conflict with earlier hop estimates. It uses the sum of round-trip times and a generous margin, never subtracts adjacent hop latencies, and cannot establish which database entry is wrong. Two earlier low-latency hops with the same country may support a *likely region* label; this is an inference, not a verified site. Conflicting pins are withheld while original database locations remain in hop details. These checks use existing diagnostic results only, with no extra probes or external requests.

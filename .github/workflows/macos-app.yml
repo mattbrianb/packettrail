@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to attach the macOS apps to (e.g. v1.1.0)
+        description: Release tag to attach the macOS apps to (e.g. v1.2.0)
         required: true
 
 permissions:

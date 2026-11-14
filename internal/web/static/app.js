@@ -1058,9 +1058,11 @@ class Diag {
   }
   renderPath(d) {
     const max = Math.max(1, ...d.hops.map(h => h.worst || 0));
-    const rows = d.hops.map(h => {
+    const locations = routeLocations(d.hops);
+    const rows = d.hops.map((h, index) => {
       const lossCls = h.sent === 0 ? '' : h.loss >= 100 ? 'bad' : h.loss > 0 ? 'warn' : 'ok';
-      const where = h.scope ? `<span class="tag">${esc(h.scope)}</span>` : (h.cc ? `${flag(h.cc)}${esc(h.city || h.cc)}` : '');
+      const location = locations[index];
+      const where = `<span title="${esc(location.reason)}">${location.status==='database' && h.cc ? flag(h.cc) : ''}${esc(location.label)}</span>`;
       const host = h.addr
         ? `<span class="hop-host">${esc(h.host || h.addr)}</span>${h.host ? `<span class="hop-ip">${esc(h.addr)}</span>` : ''}${(h.others || []).length ? `<span class="hop-ip" title="Other addresses seen at this hop (ECMP): ${esc(h.others.join(', '))}">+${h.others.length}</span>` : ''}`
         : '<span class="muted">No reply</span>';
@@ -2200,7 +2202,7 @@ function setGlow(on) {
 }
 // Canvas charts read the colours when they draw, so redraw them after a change.
 function redrawCharts() {
-  mainChart.draw();
+  mainChart.draw(); redrawRouteGlobes();
   appChart.draw();
   sysChart.draw();
   if (sysState.data && sysState.data.ready) renderSysTiles(sysState.data);
@@ -3030,7 +3032,7 @@ function applyTheme(t, animate) {
     else delete root.dataset.theme;
     setSeg($('#themeSeg'), t);
     syncTitleBar();
-    mainChart.draw();
+    mainChart.draw(); redrawRouteGlobes();
     appChart.draw();
     sysChart.draw();
     if (sysState.data && sysState.data.ready) renderSysTiles(sysState.data);
@@ -3068,7 +3070,7 @@ initSeg($('#unitSeg'), u => {
   setUnits();
   invalidate('live', 'x-flows', 'x-ips', 'x-asns');
 });
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { syncTitleBar(); mainChart.draw(); appChart.draw(); sysChart.draw(); if (sysState.data && sysState.data.ready) renderSysTiles(sysState.data); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { syncTitleBar(); mainChart.draw(); redrawRouteGlobes(); appChart.draw(); sysChart.draw(); if (sysState.data && sysState.data.ready) renderSysTiles(sysState.data); });
 $$('input.filter').forEach(inp => inp.addEventListener('input', () => {
   const t = tables[inp.dataset.table];
   t.filter = inp.value;
@@ -3083,7 +3085,7 @@ $('#hidePrivate').addEventListener('change', e => {
 function setUnits() {
   setSeg($('#unitSeg'), state.bits ? 'bits' : 'bytes');
   Object.values(tables).forEach(t => t.render(true));
-  mainChart.draw();
+  mainChart.draw(); redrawRouteGlobes();
   appChart.draw();
 }
 $('#settingsBtn').addEventListener('click', () => { fillSettings(); renderPalettes(); $('#settings').showModal(); invalidate('status'); });

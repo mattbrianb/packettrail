@@ -6,7 +6,7 @@ async function packetTrailRegression() {
   const diag=new Diag(document.querySelector('#map-regression'),'203.0.113.9');
   diag.setKind('mtr');
   const make=(ttl,lat,lon,extra={})=>({ttl,addr:'203.0.113.'+ttl,lat,lon,asn:64500+ttl,asOrg:'Example Transit',city:['','Cape Town','Unknown','London','New York'][ttl]||'Transit',sent:10,recv:10,last:12,avg:12,best:10,worst:14,stdev:1,loss:0,...extra});
-  diag.data={kind:'mtr',target:'203.0.113.9',hops:[make(1,-33.9,18.4),make(2,null,null,{scope:'private'}),make(3,51.5,-.1,{loss:10}),make(4,40.7,-74)]};
+  diag.data={kind:'mtr',target:'203.0.113.9',hops:[make(1,-33.9,18.4),make(2,null,null,{scope:'private'}),make(3,51.5,-.1,{loss:10,best:150,avg:160}),make(4,40.7,-74,{best:200,avg:210})]};
   diag.render();
   diag.body.querySelector('[data-route-view="map"]').click();
   const map=diag.routeMap;
@@ -23,12 +23,41 @@ async function packetTrailRegression() {
   diag.body.querySelector('[data-route-view="map"]').click();
   assert(diag.routeMap===map && map.svg.getAttribute('viewBox')===view,'View toggle lost zoom');
   const normal=diag.data;
-  map.update({hops:[make(1,0,0),make(2,0,179),make(3,0,-179),make(4,95,0)]});
+  map.update({hops:[make(1,0,0),make(2,0,179,{best:200}),make(3,0,-179,{best:200}),make(4,95,0)]});
   assert(map.points.length===3,'Zero or invalid coordinates mishandled');
   assert(map.svg.querySelectorAll('.map-lines path').length===3,'Dateline was not split');
   map.update({hops:[make(1,null,null)]});
   assert(map.points.length===0 && map.el.querySelector('.map-caption').textContent.includes('No public'),'Empty map misleading');
   map.update(normal);map.fit();
+  const sa=[make(1,-29.7,31.1,{cc:'ZA',best:1.5}),make(2,-26.1,28.2,{cc:'ZA',best:18.2}),make(3,37.4,-122,{cc:'US',best:16.6}),make(4,43.7,-79.4,{cc:'CA',best:16.5}),make(5,37.4,-122,{addr:'8.8.8.8',cc:'US',best:17})];
+  const assessed=routeLocations(sa);
+  assert(assessed.filter(l=>l.plotted).length===2,'Implausible intercontinental hops plotted');
+  assert(assessed[4].status==='anycast' && assessed[4].label.includes('South Africa'),'Anycast region not qualified');
+  assert(assessed[2].status==='conflict' && assessed[2].reason.includes('either database'),'Conflict certainty overstated');
+  assert(routeLocations([sa[4]])[0].label==='Anycast · site unknown','Anycast guessed a location without route evidence');
+  const us=routeLocations([make(1,37,-122,{cc:'US',best:2}),make(2,38,-121,{cc:'US',best:8}),make(3,37,-122,{cc:'US',addr:'8.8.8.8',best:10})]);
+  assert(us[2].label.includes('United States'),'Region inference was tied to one country');
+  assert(routeLocations([make(1,37,-122,{asn:15169,best:10})])[0].plotted,'An entire ASN was assumed to be anycast');
+  assert(routeLocations([make(1,0,0),make(2,50,100,{recv:1,best:1})])[1].plotted,'Insufficient timing evidence was treated as certain');
+  assert(!routeLocations([make(1,0,0,{addr:'2606:4700:4700::1111'})])[0].plotted,'IPv6 anycast got a precise pin');
+  diag.data={kind:'mtr',target:'8.8.8.8',hops:sa};diag.render();
+  assert(diag.body.querySelector('.diag-scroll').textContent.includes('Likely South Africa'),'Table and map disagree');
+  map.setMode('globe');
+  for(let i=0;i<50 && !map.globe.texture;i++) await new Promise(r=>setTimeout(r,50));
+  assert(map.globe.texture,'Offline globe outlines failed to load');
+  assert(map.svg.hasAttribute('hidden') && !map.globe.canvas.hidden,'Globe mode did not switch surfaces');
+  const previousTheme=state.theme;
+  applyTheme('dark',false);const darkPixels=map.globe.canvas.toDataURL();
+  applyTheme('light',false);assert(map.globe.canvas.toDataURL()!==darkPixels,'Globe theme did not update');
+  applyTheme(previousTheme,false);
+  const before=map.globe.lon;
+  map.globe.canvas.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
+  assert(map.globe.lon!==before,'Globe keyboard rotation failed');
+  const orientation=map.globe.lon;
+  diag.render();assert(map.globe.lon===orientation,'Live refresh reset globe rotation');
+  assert(map.globe.project(0,map.globe.lon+180).z<0,'Far hemisphere visible');
+  map.selected=5;map.details();
+  assert(map.el.querySelector('.map-detail').textContent.includes('Precise pin withheld'),'Missing uncertainty explanation');
   const originalAPI=api, previousPeer=peerState.data;
   try {
     const failure='PeeringDB connection timed out; retrying';
@@ -43,5 +72,5 @@ async function packetTrailRegression() {
     assert(renderPeer(row).sections.facts.includes('Example Network'),'Recovery did not display data');
     assert(!document.querySelector('#pdbNote').textContent.includes(failure),'Stale error after recovery');
   } finally {api=originalAPI;peerState.data=previousPeer;}
-  return {map:true,missingLocations:true,dateline:true,liveZoom:true,peeringError:true,peeringRecovery:true};
+  return {globe:true,anycast:true,locationConflict:true,map:true,missingLocations:true,dateline:true,liveZoom:true,peeringError:true,peeringRecovery:true};
 }

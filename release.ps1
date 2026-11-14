@@ -5,7 +5,7 @@
 # published, and added to the release and its SHA256SUMS.txt there.
 #   .\release.ps1              # test, build and package
 #   .\release.ps1 -SkipBuild   # package what is already in .\dist
-param([string]$Version = "1.1.0", [switch]$SkipBuild)
+param([string]$Version = "1.2.0", [switch]$SkipBuild)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 Push-Location $root

@@ -6,7 +6,7 @@ PacketTrail is Matthew Burnett's free, portable network monitor. Donations are o
 
 - Go module: packettrail; entry point: cmd/packettrail.
 - Dashboard: http://127.0.0.1:47810/.
-- Windows executable metadata: PacketTrail 1.1.0, Matthew Burnett.
+- Windows executable metadata: PacketTrail 1.2.0, Matthew Burnett.
 - History: packettrail.db; demo history: packettrail-demo.db.
 - The SVG and raster icons share a routed P-shaped trail, blue packet and orange hop.
 - Source, website and downloads are maintained in the PacketTrail repository.

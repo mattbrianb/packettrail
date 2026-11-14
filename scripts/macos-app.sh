@@ -4,7 +4,7 @@
 # workflow .github/workflows/macos-app.yml) because a proper bundle signature
 # needs Apple's codesign. The signature is ad-hoc: free, with no Apple
 # Developer account, so macOS still asks the user to confirm the first launch.
-#   scripts/macos-app.sh 1.1.0
+#   scripts/macos-app.sh 1.2.0
 set -euo pipefail
 VERSION="${1:?usage: macos-app.sh VERSION}"
 cd "$(dirname "$0")/.."
