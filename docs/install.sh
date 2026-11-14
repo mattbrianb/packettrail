@@ -26,6 +26,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 echo "Downloading $asset.zip ..."
 curl -fL --progress-bar -o "$tmp/$asset.zip" "$repo/$asset.zip"
+echo "Downloaded to (temporary): $tmp/$asset.zip"
 
 want="$(curl -fsSL "$repo/SHA256SUMS.txt" | awk -v f="$asset.zip" '$2 == f { print $1 }')"
 got="$(shasum -a 256 "$tmp/$asset.zip" | awk '{ print $1 }')"
@@ -58,7 +59,7 @@ ditto "$src" "$dest/PacketTrail.app"
 xattr -dr com.apple.quarantine "$dest/PacketTrail.app" 2>/dev/null || true
 
 ver="$(/usr/bin/defaults read "$dest/PacketTrail.app/Contents/Info" CFBundleShortVersionString 2>/dev/null || true)"
-echo "Installed PacketTrail${ver:+ $ver}: $dest/PacketTrail.app"
+echo "Installed to: $dest/PacketTrail.app${ver:+ (PacketTrail $ver)}"
 if [ "${PACKETTRAIL_NO_OPEN:-}" = "" ]; then
   open "$dest/PacketTrail.app"
 fi

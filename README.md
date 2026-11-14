@@ -493,7 +493,9 @@ Chromium or Brave app window, and otherwise your default browser.
 
 **macOS, easiest:** paste this into Terminal. It downloads the right build,
 checks it against the release's SHA-256 checksum, puts **PacketTrail.app** in
-*Applications* and opens it. Review the script before running it. Security policy may still block the app:
+*Applications* and opens it. The script prints the installed app path; its ZIP
+download is temporary and removed afterward. Review the script before running
+it. Security policy may still block the app:
 
 ```bash
 curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash
@@ -515,6 +517,15 @@ Terminal alternative for step 2:
 settings live in `~/Library/Application Support/packettrail`.
 
 **Linux** (x86-64 or arm64):
+
+To download the x64 archive with curl and print where it was saved:
+
+```bash
+curl -fL --retry 3 -o packettrail-linux-x64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz && printf 'Downloaded to: %s\n' "$PWD/packettrail-linux-x64.tar.gz"
+```
+
+For ARM64, replace `x64` with `arm64` in the download and extract
+commands. Then extract and run:
 
 ```bash
 tar xzf packettrail-linux-x64.tar.gz
