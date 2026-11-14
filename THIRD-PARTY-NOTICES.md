@@ -12,3 +12,7 @@ PacketTrail is (c) 2026 Matthew Burnett and released under the MIT licence (LICE
 - **Go libraries:** modernc.org/sqlite (BSD-3), github.com/oschwald/maxminddb-golang (ISC), golang.org/x/sys and golang.org/x/net (BSD-3).
 
 The website (docs/) uses Ghost Fibers by David Haz (React Bits, https://reactbits.dev), MIT + Commons Clause, as a background. Its licence is in the header of docs/ghost-fibers.js. It is not part of the app.
+
+## Natural Earth map outlines
+
+The bundled world-land.svg is derived from Natural Earth 1:110m land polygons (public domain), projected to longitude/latitude coordinates. Source: https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_land.geojson . Terms: https://www.naturalearthdata.com/about/terms-of-use/ .

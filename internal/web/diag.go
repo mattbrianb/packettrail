@@ -97,7 +97,7 @@ func (s *Server) handleTool(w http.ResponseWriter, r *http.Request) {
 		if host == "" {
 			host = s.eng.DNS.Get(a)
 		}
-		return tools.HopInfo{Host: host, Scope: info.Scope, CC: info.CC, City: info.City, ASN: info.ASN, ASOrg: info.ASOrg}
+		return tools.HopInfo{Lat: info.Lat, Lon: info.Lon, Host: host, Scope: info.Scope, CC: info.CC, City: info.City, ASN: info.ASN, ASOrg: info.ASOrg}
 	}
 	switch kind {
 	case "mtr", "trace":

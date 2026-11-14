@@ -115,7 +115,7 @@ func (s *Server) handleRoutes(w http.ResponseWriter, r *http.Request) {
 		if host == "" {
 			host = s.eng.DNS.Get(a)
 		}
-		return tools.HopInfo{Host: host, Scope: info.Scope, CC: info.CC, City: info.City, ASN: info.ASN, ASOrg: info.ASOrg}
+		return tools.HopInfo{Lat: info.Lat, Lon: info.Lon, Host: host, Scope: info.Scope, CC: info.CC, City: info.City, ASN: info.ASN, ASOrg: info.ASOrg}
 	}
 	sem := make(chan struct{}, 4) // trace four networks at a time
 	var wg sync.WaitGroup

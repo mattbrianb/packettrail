@@ -979,6 +979,8 @@ class Diag {
     saved.set('diagKind', k);
     setSeg(this.seg, k);
     this.portField.hidden = k !== 'tcp';
+    this.routeView = 'path';
+    this.routeMap = null;
     this.data = null;
     this.copyBtn.hidden = true;
     this.statusEl.textContent = '';
@@ -1069,7 +1071,12 @@ class Diag {
     }).join('');
     // Keep scroll owners alive across updates, including trackpad momentum.
     if (!this.body.querySelector('.diag-scroll')) {
-      this.body.innerHTML = '<div class="diag-note" hidden></div><div class="path-strip"></div><div class="diag-scroll"></div>';
+      this.body.innerHTML = '<div class="diag-note" hidden></div><div class="route-views" role="group" aria-label="Route view"><button class="btn sm" data-route-view="path" aria-pressed="true">Path</button><button class="btn sm" data-route-view="map" aria-pressed="false">Map</button></div><div class="path-strip"></div><div class="route-map" hidden></div><div class="diag-scroll"></div>';
+      this.routeMap = null;
+      this.body.querySelectorAll('[data-route-view]').forEach(button => button.addEventListener('click', () => {
+        this.routeView = button.dataset.routeView;
+        this.updateRouteView(d);
+      }));
     }
     const noteEl = this.body.querySelector('.diag-note');
     noteEl.hidden = !d.note;
@@ -1079,6 +1086,19 @@ class Diag {
     nextPath.innerHTML = pathStrip(d);
     path.replaceChildren(...(nextPath.content.firstElementChild?.childNodes || []));
     this.body.querySelector('.diag-scroll').innerHTML = `<table class="mini hops"><thead><tr><th class="num">#</th><th>Host</th><th>Network</th><th>Location</th><th class="num">Loss</th><th class="num">Sent</th><th class="num">Last</th><th class="num">Avg</th><th class="num">Best</th><th class="num">Worst</th><th class="num">StDev</th><th>Latency (ms)</th></tr></thead><tbody>${rows}</tbody></table>`;
+    this.updateRouteView(d);
+  }
+  updateRouteView(fallback) {
+    const d = this.data || fallback;
+    const map = this.body.querySelector('.route-map');
+    const active = this.routeView === 'map';
+    map.hidden = !active;
+    this.body.querySelector('.path-strip').hidden = active;
+    this.body.querySelectorAll('[data-route-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.routeView === (active ? 'map' : 'path'))));
+    if (active) {
+      if (!this.routeMap) this.routeMap = new RouteMap(map);
+      this.routeMap.update(d);
+    }
   }
   renderSeries(d) {
     const tiles = [

@@ -1281,3 +1281,20 @@ kbd {
   .hero { grid-template-columns: 1fr; }
   .metrics { flex-direction: row; gap: 28px; }
 }
+
+/* Offline route geography; keep the table available below either view. */
+.route-views, .map-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0; }
+.route-views [aria-pressed="true"] { background:var(--accent-soft); color:var(--accent); }
+.route-map { border:1px solid var(--edge); border-radius:12px; padding:12px; margin-bottom:12px; background:var(--well); }
+.map-controls { margin-top:0; }
+.map-controls label { display:flex; gap:8px; align-items:center; min-width:0; }
+.map-controls select { max-width:200px; color:var(--text); background:var(--card); border:1px solid var(--edge); border-radius:6px; padding:8px; }
+.route-map-svg { display:block; width:100%; height:clamp(220px,34vw,400px); touch-action:none; cursor:grab; background:var(--card); border-radius:6px; }
+.route-map-svg image { opacity:.35; }
+.map-lines path { fill:none; stroke:var(--text-2); stroke-width:1.5; vector-effect:non-scaling-stroke; }
+.map-lines .map-gap { stroke-dasharray:5 4; }
+.map-points circle { stroke:var(--card); stroke-width:2; vector-effect:non-scaling-stroke; cursor:pointer; }
+.map-points .ok { fill:var(--ok); } .map-points .warn { fill:var(--warn); } .map-points .bad { fill:var(--bad); }
+.map-points .selected, .map-points circle:focus { stroke:var(--text); stroke-width:3; outline:none; }
+.map-detail { margin-top:12px; line-height:1.6; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.map-caption, .map-disclaimer { margin:8px 0 0; color:var(--text-2); font-size:12px; line-height:1.6; }

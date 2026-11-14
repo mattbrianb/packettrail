@@ -26,7 +26,7 @@ const (
 	missTTL     = 24 * time.Hour
 	reqGap      = 4 * time.Second // between batches; the anonymous API is rate-limited
 	batchSize   = 10
-	httpTimeout = 60 * time.Second // PeeringDB can take several seconds; a slow link adds more
+	httpTimeout = 20 * time.Second // PeeringDB can take several seconds; a slow link adds more
 	errDelayMin = 15 * time.Second // wait after a failed request, doubling up to errDelayMax
 	errDelayMax = 5 * time.Minute
 	userAgent   = "packettrail/1.0 (+https://github.com/mattbrianb/packettrail)"
@@ -207,7 +207,7 @@ func roughly(d time.Duration) string {
 func describeErr(err error) string {
 	var ne interface{ Timeout() bool }
 	if errors.As(err, &ne) && ne.Timeout() {
-		return fmt.Sprintf("PeeringDB did not answer within %s (slow or filtered connection?)", roughly(httpTimeout))
+		return fmt.Sprintf("PeeringDB did not answer within %s ; check your connection or network policy", roughly(httpTimeout))
 	}
 	return "PeeringDB lookup failed: " + err.Error()
 }

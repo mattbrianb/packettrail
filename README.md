@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.0.2 · MIT licence ·
+By Matthew Burnett · version 1.1.0 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -599,3 +599,7 @@ Unit tests cover:
 Website screenshots can be regenerated with `node tools/screenshots.mjs`
 (Node.js 22+ and Chrome). They use synthetic fixtures and never read live
 traffic. The same command checks the website at desktop and mobile sizes.
+
+### Route geography
+
+MTR and traceroute offer Path and Map views. The map uses the installed City database and bundled Natural Earth outlines; it needs no account, map service or extra geolocation requests. Zoom, drag or use arrow keys to pan, and select a hop for its address, ASN, organisation, location, latency and loss. Live updates preserve the map view. Private, unanswered and unlocated hops stay unmapped. IP locations are approximate; connecting lines do not describe physical cables.

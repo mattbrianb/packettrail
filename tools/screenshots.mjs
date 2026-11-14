@@ -34,7 +34,7 @@ const system = {
   disks: [{ mount: 'C:\\', label: 'System', fs: 'NTFS', total: 1e12, free: 640e9, pct: 36 }],
   procs: apps.map((a, i) => ({ pid: Number(a.pids), name: a.name, path: a.path, cpu: 5 / (i + 1), mem: Math.round(1.3e9 / (i + 1)), io: 1e6 / (i + 1), threads: 24 + i, handles: 300 + i * 16, app: a.key, netIn: a.rateIn, netOut: a.rateOut })),
 };
-const status = { app: 'packettrail', version: '1.0.2', copyright: '© 2026 Matthew Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
+const status = { app: 'packettrail', version: '1.1.0', copyright: '© 2026 Matthew Burnett', os: 'windows', arch: 'amd64', hostname: 'DEMO-PC', capture: { backend: 'demo', mode: 'full', privileged: false, events: 42000, lost: 0 }, canElevate: false, dataDir: 'PacketTrail\\data', dbPath: 'PacketTrail\\data\\packettrail-demo.db', dbSize: 1.1e6, geo: { city: true, cityDate: '2026-11', asnDate: '2026-11' }, start: now - 2400, totalIn: 1.09e9, totalOut: 89.7e6, rateIn: 5.55e6, rateOut: 462500, listSep: ',', token: 'synthetic-fixture', exportDir: 'PacketTrail\\exports' };
 
 function fixture(url) {
   switch (url.pathname) {
@@ -166,6 +166,17 @@ try {
   })()`);
   await writeFile(join(root, 'dist', 'qa', 'scroll-checks.json'), JSON.stringify(scrollChecks, null, 2));
   console.log('Live diagnostic scrolling verified:', JSON.stringify(scrollChecks));
+  await evaluate(await readFile(join(root, 'tools', 'wvrun', 'map-regression.js'), 'utf8'));
+  const mapChecks = await evaluate('packetTrailRegression()');
+  await evaluate("document.querySelector('.route-map').scrollIntoView({block:'start'})");
+  await screenshot(join(root, 'dist', 'qa', 'route-map-dark.png'));
+  await evaluate("applyTheme('light', false)");
+  await screenshot(join(root, 'dist', 'qa', 'route-map-light.png'));
+  await viewport(390, 844, 'light');
+  await evaluate("document.querySelector('.route-map').scrollIntoView({block:'start'})");
+  await screenshot(join(root, 'dist', 'qa', 'route-map-mobile.png'));
+  await writeFile(join(root, 'dist', 'qa', 'map-checks.json'), JSON.stringify(mapChecks,null,2));
+  console.log('Map and PeeringDB error/recovery checks passed', mapChecks);
   const checks = [];
   for (const [width, height, name] of [[1440, 1000, 'desktop'], [390, 844, 'mobile']]) {
     await viewport(width, height, 'dark');

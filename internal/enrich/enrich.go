@@ -21,15 +21,17 @@ import (
 
 // Info is everything we know about a remote address.
 type Info struct {
-	Scope   string `json:"scope,omitempty"` // private, loopback, cgnat, ... ("" = public)
-	CC      string `json:"cc,omitempty"`
-	Country string `json:"country,omitempty"`
-	Region  string `json:"region,omitempty"`
-	City    string `json:"city,omitempty"`
-	ASN     uint32 `json:"asn,omitempty"`
-	ASOrg   string `json:"asOrg,omitempty"`
-	Network string `json:"network,omitempty"` // routed prefix containing the IP (from the ASN database)
-	PTR     string `json:"ptr,omitempty"`
+	Lat     *float64 `json:"lat,omitempty"`
+	Lon     *float64 `json:"lon,omitempty"`
+	Scope   string   `json:"scope,omitempty"` // private, loopback, cgnat, ... ("" = public)
+	CC      string   `json:"cc,omitempty"`
+	Country string   `json:"country,omitempty"`
+	Region  string   `json:"region,omitempty"`
+	City    string   `json:"city,omitempty"`
+	ASN     uint32   `json:"asn,omitempty"`
+	ASOrg   string   `json:"asOrg,omitempty"`
+	Network string   `json:"network,omitempty"` // routed prefix containing the IP (from the ASN database)
+	PTR     string   `json:"ptr,omitempty"`
 }
 
 type special struct {
@@ -66,6 +68,10 @@ func Scope(ip netip.Addr) string {
 }
 
 type cityRec struct {
+	Location struct {
+		Lat *float64 `maxminddb:"latitude"`
+		Lon *float64 `maxminddb:"longitude"`
+	} `maxminddb:"location"`
 	City struct {
 		Names struct {
 			En string `maxminddb:"en"`
@@ -271,6 +277,7 @@ func (e *Enricher) lookupGeo(ip netip.Addr) Info {
 	if d.city != nil {
 		var r cityRec
 		if d.city.Lookup(ip).Decode(&r) == nil {
+			info.Lat, info.Lon = r.Location.Lat, r.Location.Lon
 			info.CC, info.Country, info.City = r.Country.ISO, r.Country.Names.En, r.City.Names.En
 			if len(r.Subdivisions) > 0 {
 				info.Region = r.Subdivisions[0].Names.En

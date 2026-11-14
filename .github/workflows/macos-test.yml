@@ -68,6 +68,22 @@ jobs:
           sips -g pixelWidth -g pixelHeight "$APP/Contents/Resources/packettrail.icns"
           swift scripts/appicon.swift "$APP" out/icon-new-build.png
 
+      - name: Map, horizontal scrolling and PeeringDB states (WebKit)
+        timeout-minutes: 3
+        run: |
+          "$APP/Contents/MacOS/packettrail" --headless --no-geoip-download --port 47903 --data "$RUNNER_TEMP/packettrail-regression" > out/regression.log 2>&1 &
+          sleep 4
+          cat tools/wvrun/map-regression.js tools/wvrun/native-regression.js > out/regression.js
+          go run ./tools/wvrun -lib "internal/platform/webviewlib/darwin_$(go env GOARCH)" \
+            -url "http://127.0.0.1:47903/?notour&tab=tools" -init out/regression.js -timeout 60s | tee out/regression.txt
+          pkill -x packettrail || true
+          grep -q "RESULT: macOS regressions passed" out/regression.txt
+
+      - name: PeeringDB connectivity from macOS
+        continue-on-error: true
+        timeout-minutes: 2
+        run: PACKETTRAIL_LIVE=1 go test ./internal/peering -run TestFetchBatchLive -count=1 -v
+
       - name: Capture attributes traffic to apps and IPs
         run: |
           "$APP/Contents/MacOS/packettrail" --headless --no-geoip-download --port 47901 --data "$RUNNER_TEMP/ngdata" > out/headless.log 2>&1 &
@@ -82,7 +98,14 @@ jobs:
           curl -s http://127.0.0.1:47901/api/status > out/status.json
           curl -s "http://127.0.0.1:47901/api/apps?period=live" > out/apps.json
           curl -s "http://127.0.0.1:47901/api/ips?period=live" > out/ips.json
+          yes > /dev/null &
+          load_pid=$!
+          trap 'kill "$load_pid" 2>/dev/null || true' EXIT
+          sleep 5
           curl -s http://127.0.0.1:47901/api/system > out/system.json
+          kill "$load_pid" || true
+          trap - EXIT
+          jq -e '[.procs[] | select(.cpu > 0)] | length > 0' out/system.json > /dev/null
           pkill -x packettrail || true
           echo "--- capture status"; jq '.capture' out/status.json
           echo "--- apps: $(jq 'length' out/apps.json)"; jq -c '.[0:8][] | {name, in, out, ips}' out/apps.json || head -c 1200 out/apps.json

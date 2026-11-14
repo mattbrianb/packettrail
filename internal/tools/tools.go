@@ -51,12 +51,14 @@ var ErrNeedsPrivilege = errors.New("ICMP probing needs administrator/root rights
 
 // HopInfo describes an address for display (filled by the caller).
 type HopInfo struct {
-	Host  string `json:"host"`
-	Scope string `json:"scope"`
-	CC    string `json:"cc"`
-	City  string `json:"city"`
-	ASN   uint32 `json:"asn"`
-	ASOrg string `json:"asOrg"`
+	Lat   *float64 `json:"lat,omitempty"`
+	Lon   *float64 `json:"lon,omitempty"`
+	Host  string   `json:"host"`
+	Scope string   `json:"scope"`
+	CC    string   `json:"cc"`
+	City  string   `json:"city"`
+	ASN   uint32   `json:"asn"`
+	ASOrg string   `json:"asOrg"`
 }
 
 // Describe looks up display info for an address.
