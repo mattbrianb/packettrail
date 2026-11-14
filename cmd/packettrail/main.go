@@ -31,7 +31,7 @@ import (
 	"packettrail/internal/web"
 )
 
-var version = "1.2.0"
+var version = "1.3.0"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).
@@ -58,7 +58,7 @@ type config struct {
 func main() {
 	var c config
 	flag.IntVar(&c.port, "port", 47810, "dashboard port on 127.0.0.1 (falls back to a free port if taken)")
-	flag.StringVar(&c.dataDir, "data", "", "data folder for the history database and GeoIP files (default: 'data' next to the executable)")
+	flag.StringVar(&c.dataDir, "data", "", "data folder for history and GeoIP files (default: stable per-user PacketTrail folder)")
 	flag.BoolVar(&c.noElevate, "no-elevate", false, "Windows: do not ask for administrator rights at start")
 	flag.BoolVar(&c.limited, "limited", false, "force connections-only mode (no byte counts)")
 	flag.BoolVar(&c.browser, "browser", false, "Windows: open the dashboard in the default browser instead of a window")
@@ -68,7 +68,7 @@ func main() {
 	flag.BoolVar(&c.loopback, "loopback", false, "include loopback (127.0.0.1 / ::1) traffic")
 	flag.BoolVar(&c.relaunched, "relaunched", false, "internal: set when restarted elevated")
 	flag.BoolVar(&c.demo, "demo", false, "test aid: real connections with synthetic byte counts, stored in packettrail-demo.db")
-	flag.BoolVar(&c.noGeoDL, "no-geoip-download", false, "do not download the DB-IP Lite databases automatically when they are missing")
+	flag.BoolVar(&c.noGeoDL, "no-geoip-download", false, "deprecated compatibility flag; GeoIP downloads are manual")
 	showVersion := flag.Bool("version", false, "print version and exit")
 	install := flag.Bool("install", false, "Linux: add PacketTrail to your applications menu, then exit")
 	uninstall := flag.Bool("uninstall", false, "Linux: remove PacketTrail from your applications menu, then exit")
@@ -162,8 +162,9 @@ func relaunchArgs() []string {
 	return append(args, "--relaunched")
 }
 
-// resolveDataDir prefers a "data" folder next to the executable (portable
-// use); if that is not writable it uses the per-user config folder.
+// resolveDataDir uses stable per-user storage. A temporary extraction folder
+// must never become the default home for history or GeoIP databases.
+// --data remains available for explicit portable installations.
 func resolveDataDir(flagVal string) (string, error) {
 	try := func(d string) bool {
 		if err := os.MkdirAll(d, 0o755); err != nil {
@@ -183,27 +184,15 @@ func resolveDataDir(flagVal string) (string, error) {
 		}
 		return filepath.Abs(flagVal)
 	}
-	if exe, err := os.Executable(); err == nil && !insideAppBundle(exe) {
-		if d := filepath.Join(filepath.Dir(exe), "data"); try(d) {
-			return d, nil
-		}
-	}
 	cfg, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
 	d := filepath.Join(cfg, "packettrail")
 	if !try(d) {
-		return "", fmt.Errorf("no writable data folder (tried next to the executable and %s)", d)
+		return "", fmt.Errorf("data folder %s is not writable", d)
 	}
 	return d, nil
-}
-
-// insideAppBundle reports whether exe runs from a macOS .app bundle. Data is
-// never written into a bundle: that would break its signature, and a freshly
-// downloaded app runs from a read-only, translocated copy anyway.
-func insideAppBundle(exe string) bool {
-	return strings.Contains(filepath.ToSlash(exe), ".app/Contents/MacOS/")
 }
 
 func trimLog(f *os.File) {
@@ -249,17 +238,8 @@ func run(c config) error {
 	defer st.Close()
 	enr := enrich.New(c.dataDir, st)
 	defer enr.Close()
-	// First start: fetch the free DB-IP Lite databases so locations and
-	// networks show up without a trip to Settings.
-	if enr.Missing() && !c.noGeoDL {
-		go func() {
-			time.Sleep(2 * time.Second) // let the window open first
-			log.Printf("GeoIP databases missing; downloading DB-IP Lite")
-			if err := enr.Download(); err != nil {
-				log.Printf("GeoIP download failed: %v (retry from Settings)", err)
-			}
-		}()
-	}
+	// Databases are installed once with the app. Updates are requested from
+	// Settings; launching the app never starts an unsolicited download.
 
 	capt, procs := capture.New(capture.Options{Unprivileged: c.limited})
 	if c.demo {

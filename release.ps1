@@ -5,7 +5,7 @@
 # published, and added to the release and its SHA256SUMS.txt there.
 #   .\release.ps1              # test, build and package
 #   .\release.ps1 -SkipBuild   # package what is already in .\dist
-param([string]$Version = "1.2.0", [switch]$SkipBuild)
+param([string]$Version = "1.3.0", [switch]$SkipBuild)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 Push-Location $root
@@ -37,8 +37,19 @@ try {
     New-Item -ItemType Directory -Force $stage | Out-Null
     Copy-Item dist\packettrail.exe, README.md, LICENSE, $notices $stage
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath (Join-Path $out 'packettrail-windows-x64.zip') -CompressionLevel Optimal
+    # The installer carries GeoIP seed files into stable per-user storage.
+    # Existing databases are preserved by packaging/packettrail.iss.
+    $geoDir = Join-Path $root 'dist\data'
+    foreach ($file in @('dbip-city-lite.mmdb', 'dbip-city-lite.version', 'dbip-asn-lite.mmdb', 'dbip-asn-lite.version')) {
+        if (-not (Test-Path (Join-Path $geoDir $file))) { throw "missing GeoIP installer seed: $file" }
+    }
+    $iscc = Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 7\ISCC.exe'
+    if (-not (Test-Path $iscc)) { $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source }
+    if (-not $iscc -or -not (Test-Path $iscc)) { throw 'Inno Setup 7 compiler (ISCC.exe) is required for the Windows installer' }
+    & $iscc "/DAppVersion=$Version" "/DSourceDir=$stage" "/DGeoDir=$geoDir" "/DOutputDir=$out" (Join-Path $root 'packaging\packettrail.iss')
+    if ($LASTEXITCODE) { throw 'Windows installer build failed' }
     Remove-Item $stage -Recurse -Force
-    Write-Host 'packaged packettrail-windows-x64.zip'
+    Write-Host 'packaged packettrail-windows-x64.zip and packettrail-windows-x64-setup.exe'
 
     # Linux: tarballs with real Unix permissions (the binary is executable).
     foreach ($t in @(@{ name = 'packettrail-linux-x64'; bin = 'dist\linux-amd64\packettrail' },

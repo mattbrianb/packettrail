@@ -32,7 +32,7 @@ for (const s of switches) {
 }
 setRegister(root.dataset.reg === 'eng' ? 'eng' : 'plain', false);
 
-/* ---------- copy buttons (the macOS install command) ---------- */
+/* ---------- copy buttons (download commands) ---------- */
 for (const b of document.querySelectorAll('[data-copy]')) {
   const label = b.textContent;
   b.addEventListener('click', async () => {

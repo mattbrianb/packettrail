@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.2.0 · MIT licence ·
+By Matthew Burnett · version 1.3.0 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -21,17 +21,27 @@ hostname the app actually looked up.
   anonymous PeeringDB lookups by AS number (Peering tab); the probes you start
   (diagnostics, monitors, route map, and a few ICMP probes towards 1.1.1.1
   for ISP detection, at most every 6 hours); and the free DB-IP Lite GeoIP
-  databases (about 135 MB), downloaded once on first start and afterwards
-  only when you click *Download latest* (turn the first-start download off
-  with `--no-geoip-download`).
+  databases (about 135 MB), included in the Windows installer. Updates
+  download only when you click *Settings → Download latest*. On macOS and
+  Linux, use that button once if the databases are missing.
 
 ## Quick start (Windows)
 
-1. Download `packettrail-windows-x64.zip` from the
+1. Download `packettrail-windows-x64-setup.exe` from the
    [latest release](https://github.com/mattbrianb/packettrail/releases/latest)
-   and extract it anywhere (USB stick, network share, `C:\Tools\...`). The app
-   keeps its `data` folder next to `packettrail.exe`, so move them together.
-2. Double-click `packettrail.exe`. If Windows warns or blocks it, read
+   and run the installer. It includes offline GeoIP databases and preserves
+   your data when you install an update. The ZIP remains available as an
+   alternative, but it does not include the databases.
+   In PowerShell you can download the installer directly:
+
+   ```powershell
+   curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
+   ```
+
+   Verify its SHA-256 against the published `SHA256SUMS.txt` before running it.
+   A command-line download may help when a browser download fails; it does not
+   bypass security software or computer policy.
+2. Open PacketTrail from the Start menu. If Windows warns or blocks it, read
    [Security warnings and trust](#security-warnings-and-trust) before proceeding.
 3. Windows shows a UAC prompt.
    - **Yes** gives full capture: bytes per app, per remote IP, TCP and UDP,
@@ -54,7 +64,7 @@ packettrail.exe --selftest 20
 ```
 
 Browse a little while it runs. It prints the top apps and remote IPs with byte
-counts and saves the report as `data\selftest-*.txt`.
+counts and saves the report in the PacketTrail data folder.
 
 ## Security warnings and trust
 
@@ -66,7 +76,7 @@ computers will accept it.
 - **Download from the official release:** use the links above. Compare the
   downloaded archive's SHA-256 with its entry in the release's
   `SHA256SUMS.txt`. On Windows, for example, run
-  `Get-FileHash .\packettrail-windows-x64.zip -Algorithm SHA256`.
+  `Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256`.
   A matching checksum confirms the archive matches the published download;
   it is not a security scan or a guarantee that the app is safe.
 - **First-run warnings:** the operating system may offer an option to approve
@@ -379,14 +389,14 @@ packettrail.exe [options]
   --no-elevate     do not show the UAC prompt at start (connections-only unless already admin)
   --limited        force connections-only mode
   --port N         dashboard port on 127.0.0.1 (default 47810; a free port is used if taken)
-  --data DIR       data folder (default: "data" next to the executable)
+  --data DIR       data folder (default: stable per-user PacketTrail folder)
   --retention N    days of history to keep (default 90)
   --loopback       include 127.0.0.1 / ::1 traffic (e.g. app -> local proxy/VPN client)
   --selftest N     capture for N seconds, print a diagnostic report, exit
   --demo           test aid: real connections with synthetic byte counts, stored in packettrail-demo.db
                    (shows the computer name as DEMO-PC, for screenshots)
   --no-geoip-download
-                   do not download the DB-IP Lite databases automatically on first start
+                   deprecated compatibility flag; downloads are manual
   --version
 ```
 
@@ -419,8 +429,10 @@ estimated (not yet measured) at a few MB per busy day.
 
 ## Data folder
 
-The folder is `data\` next to the exe. If that isn't writable, it falls back
-to `%APPDATA%\packettrail`.
+The default folder is `%APPDATA%\packettrail` on Windows,
+`~/Library/Application Support/packettrail` on macOS and
+`~/.config/packettrail` on Linux. It is independent of the app installation.
+Use `--data DIR` to choose another folder.
 
 | File | Purpose |
 |---|---|
@@ -515,11 +527,10 @@ The app window needs WebKitGTK 4.1, which most desktops already have
 (`sudo apt install libwebkit2gtk-4.1-0` on Debian/Ubuntu,
 `sudo dnf install webkit2gtk4.1` on Fedora). Run as root, PacketTrail opens your
 browser as the desktop user instead of a root window. The Linux build uses a
-`data` folder next to the binary (or `~/.config/packettrail` if that folder isn't
-writable).
+`~/.config/packettrail` folder (or `--data DIR` for a custom location).
 
-On both systems the free GeoIP databases download on first start, or later
-via *Settings → Download latest*.
+On macOS and Linux, use *Settings → Download latest* once to install the
+free GeoIP databases. PacketTrail never downloads them at launch.
 
 What's weaker than on Windows, and why:
 - **Linux without root** has no UDP and no DNS names, and can only attribute

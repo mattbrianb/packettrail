@@ -67,7 +67,7 @@
         </div>
         <!-- One button per system: os.js picks, and Windows is the default. -->
         <div class="cta">
-          <a class="btn primary" data-for="windows" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip">
+          <a class="btn primary" data-for="windows" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Download for Windows
           </a>
@@ -85,9 +85,9 @@
           </a>
           <a class="btn" href="https://github.com/mattbrianb/packettrail">View the source</a>
         </div>
-        <p class="fine" data-for="windows">Free · version 1.2.0 · Windows 10 and 11, 64-bit · also <a href="#download">macOS and Linux</a></p>
-        <p class="fine" data-for="macos">Free · version 1.2.0 · Apple silicon and Intel · also <a href="#download">Windows and Linux</a></p>
-        <p class="fine" data-for="linux"><span data-arch-for="x64">Free · version 1.2.0 · x64</span><span data-arch-for="arm64">Free · version 1.2.0 · ARM64</span> · also <a href="#download">Windows and macOS</a></p>
+        <p class="fine" data-for="windows">Free · version 1.3.0 · Windows 10 and 11, 64-bit · also <a href="#download">macOS and Linux</a></p>
+        <p class="fine" data-for="macos">Free · version 1.3.0 · Apple silicon and Intel · also <a href="#download">Windows and Linux</a></p>
+        <p class="fine" data-for="linux"><span data-arch-for="x64">Free · version 1.3.0 · x64</span><span data-arch-for="arm64">Free · version 1.3.0 · ARM64</span> · also <a href="#download">Windows and macOS</a></p>
       </div>
 
       <div class="stage" id="demo" role="img" aria-label="Demo of PacketTrail with demo data: steam.exe climbs to the top of the Applications table at about 48 Mbps, and PacketTrail shows it is talking to Valve's servers in Frankfurt.">
@@ -246,8 +246,8 @@
       <div>
         <h2>It stays on your PC</h2>
         <div class="swap">
-          <p data-v="plain">No account, no ads, no tracking. PacketTrail keeps its history, settings and test results in a folder next to the program. It only sends out what's listed here.</p>
-          <p data-v="eng">No telemetry. History is a local SQLite file beside the exe, and GeoIP and ASN lookups are offline. Outbound traffic is limited to the list here.</p>
+          <p data-v="plain">No account, no ads, no tracking. PacketTrail keeps its history, settings and test results in your user data folder. It only sends out what's listed here.</p>
+          <p data-v="eng">No telemetry. History is a local SQLite file in your user data folder, and GeoIP and ASN lookups are offline. Outbound traffic is limited to the list here.</p>
         </div>
         <p class="fine">The source is open, so you can check: <a href="https://github.com/mattbrianb/packettrail">github.com/mattbrianb/packettrail</a></p>
       </div>
@@ -256,13 +256,13 @@
           <li><b>Name lookups</b> to your own DNS server, to show website names</li>
           <li><b>Anonymous look-ups</b> of network owners, on the Peering tab</li>
           <li><b>The tests you start</b> yourself: traceroute, ping and monitors</li>
-          <li><b>A free location database</b>, downloaded once on first start</li>
+          <li><b>A free location database</b>, bundled with the Windows installer or downloaded on request in Settings</li>
         </ul>
         <ul class="leaves" data-v="eng">
           <li><b>Reverse DNS</b> (PTR) via your configured resolver</li>
           <li><b>PeeringDB</b> API queries by ASN, anonymous, Peering tab only</li>
           <li><b>Probes you start</b>, plus a few ICMP probes towards 1.1.1.1 for ISP detection, at most every 6 hours</li>
-          <li><b>DB-IP Lite</b> City and ASN, about 135 MB, on first start; <code>--no-geoip-download</code> skips it</li>
+          <li><b>DB-IP Lite</b> City and ASN, about 135 MB, included with the Windows installer or downloaded on request in Settings</li>
         </ul>
       </div>
     </div>
@@ -273,23 +273,28 @@
       <div class="dl-head">
         <div>
           <h2>Download PacketTrail</h2>
-          <p data-for="windows">Free, portable and open source. Extract the zip anywhere and run <code>packettrail.exe</code>. Nothing to install.</p>
+          <p data-for="windows">Free and open source. The installer includes offline location and ASN databases. Your history and databases stay in your user folder when you update.</p>
           <p data-for="macos">Free and open source. One line in Terminal puts PacketTrail in Applications and opens it, with no security prompt.</p>
           <p data-for="linux">Free, portable and open source. Extract it anywhere and run <code>./packettrail</code>. Nothing to install.</p>
         </div>
         <div class="dl-main" data-for="windows">
-          <a class="btn primary big" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip">
+          <a class="btn primary big" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe">
             <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Windows 10 / 11 · 64-bit
           </a>
-          <span class="fine">Version 1.2.0 · zip · about 6 MB</span>
+          <span class="fine">Version 1.3.0 · installer · includes offline GeoIP data</span>
+          <div class="cmd">
+            <code id="win-curl">curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
+            <button type="button" class="btn primary" data-copy="win-curl" aria-live="polite">Copy</button>
+          </div>
+          <span class="fine">PowerShell command for a direct download. Check its SHA-256 below before running it. Security software and device policy may still block the file.</span>
         </div>
         <div class="dl-main" data-for="macos">
           <div class="cmd">
             <code id="mac-cmd">curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash</code>
             <button type="button" class="btn primary" data-copy="mac-cmd" aria-live="polite">Copy</button>
           </div>
-          <span class="fine">Version 1.2.0 · paste into Terminal · or the zip for <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip">Apple silicon</a> or <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip">Intel</a></span>
+          <span class="fine">Version 1.3.0 · paste into Terminal · or the zip for <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip">Apple silicon</a> or <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip">Intel</a></span>
         </div>
         <div class="dl-main" data-for="linux">
           <a class="btn primary big" data-arch-for="x64" href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">
@@ -300,8 +305,10 @@
             <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Linux · ARM64
           </a>
-          <span class="fine" data-arch-for="x64">Version 1.2.0 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
-          <span class="fine" data-arch-for="arm64">Version 1.2.0 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
+          <span class="fine" data-arch-for="x64">Version 1.3.0 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
+          <span class="fine" data-arch-for="arm64">Version 1.3.0 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
+          <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">curl -fL --retry 3 -o packettrail-linux-x64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
+          <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">curl -fL --retry 3 -o packettrail-linux-arm64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
         </div>
       </div>
 
@@ -334,7 +341,7 @@ cd packettrail-linux-arm64</code></pre>
         <div class="panel" data-for="windows">
           <h3>First run on Windows</h3>
           <ol>
-            <li>Extract the zip and double-click <code>packettrail.exe</code>.</li>
+            <li>Run the installer, then open PacketTrail from the Start menu.</li>
             <li><span class="swap">
               <span data-v="plain">Choose <b>Yes</b> at the administrator prompt to see how much data each app uses. With <b>No</b> you still see who talks to whom.</span>
               <span data-v="eng"><b>Yes</b> gives full capture via ETW: per-app bytes, UDP and DNS names. <b>No</b> gives connections only, from the TCP table.</span>
@@ -345,7 +352,8 @@ cd packettrail-linux-arm64</code></pre>
         <div class="panel">
           <h3>Check your download</h3>
           <p>Every release lists SHA-256 checksums in <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a>. <span data-for="windows">In PowerShell:</span><span data-for="macos">The Terminal command checks it for you. For a zip:</span><span data-for="linux">In a terminal:</span></p>
-          <pre data-for="windows"><code>Get-FileHash .\packettrail-windows-x64.zip</code></pre>
+          <pre data-for="windows"><code>curl.exe -fL -o SHA256SUMS.txt https://github.com/mattbrianb/packettrail/releases/latest/download/SHA256SUMS.txt
+Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256</code></pre>
           <pre data-for="macos"><code>shasum -a 256 packettrail-macos-*.zip</code></pre>
           <pre data-for="linux"><code>sha256sum packettrail-linux-*.tar.gz</code></pre>
           <p class="fine">Release notes for every version are on <a href="https://github.com/mattbrianb/packettrail/releases">GitHub Releases</a>.</p>
@@ -353,13 +361,14 @@ cd packettrail-linux-arm64</code></pre>
         <div class="panel platforms">
           <h3>All downloads</h3>
           <ul>
-            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip"><span>Windows · x64</span><code>packettrail-windows-x64.zip</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe"><span>Windows · x64 installer</span><code>packettrail-windows-x64-setup.exe</code></a></li>
+            <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64.zip"><span>Windows · x64 portable ZIP (GeoIP download in Settings)</span><code>packettrail-windows-x64.zip</code></a></li>
             <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip"><span>macOS · Apple silicon</span><code>packettrail-macos-arm64.zip</code></a></li>
             <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip"><span>macOS · Intel</span><code>packettrail-macos-x64.zip</code></a></li>
             <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz"><span>Linux · x64</span><code>packettrail-linux-x64.tar.gz</code></a></li>
             <li><a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz"><span>Linux · ARM64</span><code>packettrail-linux-arm64.tar.gz</code></a></li>
           </ul>
-          <p class="fine" data-not-for="windows"><b>Windows:</b> extract the zip and run <code>packettrail.exe</code>. Choose <b>Yes</b> at the administrator prompt to see how much data each app uses.</p>
+          <p class="fine" data-not-for="windows"><b>Windows:</b> run the installer and launch PacketTrail from the Start menu. Choose <b>Yes</b> at the administrator prompt for full capture.</p>
           <p class="fine" data-not-for="macos"><b>macOS:</b> paste this into Terminal instead of downloading a zip. It puts PacketTrail in Applications, and it opens without the security prompt a browser download gets.</p>
           <pre data-not-for="macos"><code>curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash</code></pre>
           <p class="fine" data-not-for="linux"><b>Linux:</b> run <code>./packettrail --install</code> to add it to your apps menu. The app window needs WebKitGTK 4.1; run with <code>sudo</code> for full detail.</p>

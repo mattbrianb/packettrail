@@ -33,7 +33,7 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 
 ## Operating Context
 
-- Runs from a folder, USB stick or network share. Its `data` folder sits next to the exe.
+- Runs from a folder, USB stick or network share. Its data lives in a stable per-user folder unless `--data` is set.
 - Answering Yes to the administrator (UAC) prompt gives full per-app byte counts; answering No still shows who talks to whom.
 - It opens its own window (WebView2) on Windows, and the default browser on Linux and macOS.
 - It is used while something is happening, such as a slow game, a stalled call or a saturated link, and during support work.
@@ -41,8 +41,8 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 ## Capabilities and Constraints
 
 - **Platforms:** Windows 10/11 x64 is the primary target. Linux (x64, ARM64) and macOS (Apple silicon, Intel) builds ship but are untested on real machines.
-- **Lookups:** location and ASN come offline from the DB-IP Lite databases (CC BY 4.0), about 135 MB, downloaded once on first start.
-- **What leaves the PC:** reverse DNS to the user's own DNS server, anonymous PeeringDB lookups by AS number, the tests the user starts, and that GeoIP download.
+- **Lookups:** location and ASN come offline from the DB-IP Lite databases (CC BY 4.0), about 135 MB, included in the Windows installer or downloaded on request in Settings.
+- **What leaves the PC:** reverse DNS to the user's own DNS server, anonymous PeeringDB lookups by AS number, the tests the user starts, and GeoIP updates requested in Settings.
 - **Signing:** the exe is not code-signed, so Windows may warn or block it on first run. The macOS app is ad-hoc signed but not notarised.
 - **Distribution:** the website is static HTML/CSS/JS on GitHub Pages from `docs/`, with no build step. Downloads are GitHub Releases with version-less asset names, linked as `releases/latest/download/<name>`.
 - **Cost:** no paid services, hosting or certificates.
