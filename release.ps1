@@ -5,7 +5,7 @@
 # published, and added to the release and its SHA256SUMS.txt there.
 #   .\release.ps1              # test, build and package
 #   .\release.ps1 -SkipBuild   # package what is already in .\dist
-param([string]$Version = "1.3.0", [switch]$SkipBuild)
+param([string]$Version = "1.3.1", [switch]$SkipBuild)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 Push-Location $root
@@ -40,6 +40,8 @@ try {
     # The installer carries GeoIP seed files into stable per-user storage.
     # Existing databases are preserved by packaging/packettrail.iss.
     $geoDir = Join-Path $root 'dist\data'
+    & $go run ./tools/geoipseed -dir $geoDir
+    if ($LASTEXITCODE) { throw 'GeoIP installer seed preparation failed' }
     foreach ($file in @('dbip-city-lite.mmdb', 'dbip-city-lite.version', 'dbip-asn-lite.mmdb', 'dbip-asn-lite.version')) {
         if (-not (Test-Path (Join-Path $geoDir $file))) { throw "missing GeoIP installer seed: $file" }
     }

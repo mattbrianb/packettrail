@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.3.0 · MIT licence ·
+By Matthew Burnett · version 1.3.1 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -584,13 +584,16 @@ The repository includes everything needed to rebuild except the toolchain.
 ```powershell
 .\build.ps1            # vet + tests + build all five targets into .\dist
 .\build.ps1 -SkipTests
-.\release.ps1          # build, then package zips/tarballs + SHA256SUMS into .\dist\release
+.\release.ps1          # build, then package installer, zips/tarballs and checksums
 ```
 
 The website is plain HTML in `docs/`, published with GitHub Pages.
 
 `build.ps1` uses the portable Go in `.toolchain\go` if present, otherwise `go`
-from PATH (Go 1.27+). No C compiler is needed.
+from PATH (Go 1.27+). No C compiler is needed. For a Windows installer,
+`release.ps1` also needs Inno Setup 7. It uses DB-IP Lite files in
+`dist\data`; if they are missing, `go run ./tools/geoipseed -dir dist/data`
+fetches and validates them from DB-IP before packaging.
 
 Layout:
 - `cmd/packettrail`: entry point, self-test, demo mode, Windows resources

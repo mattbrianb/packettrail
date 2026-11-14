@@ -2,7 +2,7 @@
 
 PacketTrail is (c) 2026 Matthew Burnett and released under the MIT licence (LICENSE).
 
-- **IP geolocation by DB-IP** (https://db-ip.com): the DB-IP Lite City and ASN databases, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). The app downloads them on first start; they are not part of the download.
+- **IP geolocation by DB-IP** (https://db-ip.com): the DB-IP Lite City and ASN databases, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). The Windows installer includes the City and ASN databases. On other platforms and in the portable ZIP, they can be downloaded on request in Settings. Updates are always requested there.
 - **Country flags:** the Twemoji Country Flags font (TalkJS, MIT), with Twemoji graphics licensed CC BY 4.0. In the release downloads the full text follows below; in the source it is third_party/TwemojiCountryFlags-LICENSE.md.
 - **Native window on macOS and Linux:**
   - webview (https://github.com/webview/webview), MIT, Copyright (c) 2017 Serge Zaitsev and contributors. The prebuilt libwebview libraries are embedded.
