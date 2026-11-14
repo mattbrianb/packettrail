@@ -36,6 +36,7 @@ hostname the app actually looked up.
 
    ```powershell
    curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
+   if ($LASTEXITCODE -eq 0) { Write-Host ("Downloaded to: " + (Resolve-Path -LiteralPath .\packettrail-windows-x64-setup.exe).Path) }
    ```
 
    Verify its SHA-256 against the published `SHA256SUMS.txt` before running it.

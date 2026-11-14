@@ -284,7 +284,8 @@
           </a>
           <span class="fine">Version 1.3.1 · installer · includes offline GeoIP data</span>
           <div class="cmd">
-            <code id="win-curl">curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
+            <code id="win-curl">curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
+if ($LASTEXITCODE -eq 0) { Write-Host ("Downloaded to: " + (Resolve-Path -LiteralPath .\packettrail-windows-x64-setup.exe).Path) }</code>
             <button type="button" class="btn primary" data-copy="win-curl" aria-live="polite">Copy</button>
           </div>
           <span class="fine">PowerShell command for a direct download. Check its SHA-256 below before running it. Security software and device policy may still block the file.</span>
