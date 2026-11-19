@@ -32,7 +32,7 @@ import (
 	"packettrail/internal/web"
 )
 
-var version = "1.4.0"
+var version = "1.4.1"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).
@@ -119,9 +119,18 @@ func main() {
 			log.Printf("elevation not granted (%v): running in connections-only mode", err)
 		}
 	}
-	if err := run(c); err != nil {
+	releaseInstallMutex := platform.HoldInstallMutex()
+	updatePath, err := run(c)
+	releaseInstallMutex()
+	if err != nil {
 		log.Printf("fatal: %v", err)
 		os.Exit(1)
+	}
+	if updatePath != "" {
+		if err := platform.OpenUpdate(updatePath); err != nil {
+			log.Printf("could not open update installer: %v", err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -227,14 +236,14 @@ func (n nullCapture) Status() capture.Status {
 	return capture.Status{Backend: "none", Mode: "none", Error: n.err}
 }
 
-func run(c config) error {
+func run(c config) (string, error) {
 	dbName := "packettrail.db"
 	if c.demo {
 		dbName = "packettrail-demo.db"
 	}
 	st, err := store.Open(filepath.Join(c.dataDir, dbName))
 	if err != nil {
-		return fmt.Errorf("open history database: %w", err)
+		return "", fmt.Errorf("open history database: %w", err)
 	}
 	defer st.Close()
 	enr := enrich.New(c.dataDir, st)
@@ -311,6 +320,7 @@ func run(c config) error {
 	}()
 
 	shutdown := make(chan struct{})
+	pendingUpdate := make(chan string, 1)
 	var shutOnce sync.Once
 	stop := func() { shutOnce.Do(func() { close(shutdown); platform.CloseWindow() }) }
 
@@ -344,13 +354,16 @@ func run(c config) error {
 		opts.ExportDir = filepath.Join(c.dataDir, "exports")
 	}
 	opts.OpenUpdate = func(path string) error {
-		if err := platform.OpenUpdate(path); err != nil {
-			return err
-		}
 		if runtime.GOOS == "windows" {
-			go func() { time.Sleep(500 * time.Millisecond); stop() }()
+			select {
+			case pendingUpdate <- path:
+				go stop()
+				return nil
+			default:
+				return fmt.Errorf("update installer is already opening")
+			}
 		}
-		return nil
+		return platform.OpenUpdate(path)
 	}
 	if opts.CanElevate {
 		opts.Elevate = func() error {
@@ -365,7 +378,7 @@ func run(c config) error {
 
 	l, err := listenWait(c.port, c.relaunched)
 	if err != nil {
-		return err
+		return "", err
 	}
 	url := fmt.Sprintf("http://127.0.0.1:%d/", l.Addr().(*net.TCPAddr).Port)
 	hs := &http.Server{Handler: srv.Handler(), ReadHeaderTimeout: 10 * time.Second}
@@ -417,7 +430,12 @@ func run(c config) error {
 	cancel()
 	bg.Wait()
 	flush()
-	return nil
+	select {
+	case path := <-pendingUpdate:
+		return path, nil
+	default:
+		return "", nil
+	}
 }
 
 // listenWait binds the dashboard port. After an elevated restart the old

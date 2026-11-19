@@ -48,6 +48,8 @@ func OpenURL(url string) error {
 // to replace the app on macOS and Linux.
 func OpenUpdate(path string) error { return Reveal(path) }
 
+func HoldInstallMutex() func() { return func() {} }
+
 // DownloadsDir returns ~/Downloads (of the sudo-invoking user if any), or "".
 func DownloadsDir() string {
 	home, _ := os.UserHomeDir()

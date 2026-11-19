@@ -74,6 +74,17 @@ func OpenURL(url string) error {
 // monitor does not pass its admin token to the per-user installer.
 func OpenUpdate(path string) error { return exec.Command("explorer.exe", path).Start() }
 
+// HoldInstallMutex lets Setup detect a running monitor before replacing its
+// executable. The handle is released after capture and storage close.
+func HoldInstallMutex() func() {
+	name, _ := windows.UTF16PtrFromString("PacketTrail.E829287E.EF1E.45A6.A825.2B67A7FB87C8")
+	h, _ := windows.CreateMutex(nil, false, name)
+	if h == 0 {
+		return func() {}
+	}
+	return func() { windows.CloseHandle(h) }
+}
+
 // DownloadsDir returns the user's Downloads folder.
 func DownloadsDir() string {
 	if p, err := windows.KnownFolderPath(windows.FOLDERID_Downloads, 0); err == nil && p != "" {

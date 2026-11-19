@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "1.4.0"
+  #define AppVersion "1.4.1"
 #endif
 #ifndef SourceDir
   #error SourceDir must point to the staged Windows files
@@ -19,6 +19,8 @@ AppPublisher=Matthew Burnett
 AppPublisherURL=https://github.com/mattbrianb/packettrail
 AppSupportURL=https://github.com/mattbrianb/packettrail/issues
 AppUpdatesURL=https://github.com/mattbrianb/packettrail/releases
+AppMutex=PacketTrail.E829287E.EF1E.45A6.A825.2B67A7FB87C8
+CloseApplications=yes
 DefaultDirName={localappdata}\Programs\PacketTrail
 DefaultGroupName=PacketTrail
 PrivilegesRequired=lowest

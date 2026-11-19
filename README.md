@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.4.0 · MIT licence ·
+By Matthew Burnett · version 1.4.1 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -31,7 +31,11 @@ hostname the app actually looked up.
 
 1. Download `packettrail-windows-x64-setup.exe` from the
    [latest release](https://github.com/mattbrianb/packettrail/releases/latest)
-   and run the installer. It includes offline GeoIP databases and preserves
+   and run the installer. **Close PacketTrail before a manual reinstall.** If
+   Setup says it cannot replace `packettrail.exe`, cancel Setup, close the
+   PacketTrail window, end any remaining PacketTrail process in Task Manager,
+   then run Setup again. Do not skip the executable. Setup includes offline
+   GeoIP databases and preserves
    your data when you install an update. The ZIP remains available as an
    alternative, but it does not include the databases.
    In PowerShell you can download the installer directly:
@@ -438,9 +442,9 @@ to read the release notes. *Download update* saves the build for your platform
 in your Downloads folder (or the local data folder's `updates` subfolder when
 Downloads is unavailable) and verifies it against the SHA-256 digest
 published with that release. This checks the file against GitHub's release
-metadata; the app is not independently code-signed. Windows can then run the
-installer from the app;
-the monitor closes so the installer can replace it. On macOS and Linux the app
+metadata; the app is not independently code-signed. On Windows, opening the
+update from the app stops capture, saves history and closes the monitor before
+Setup opens, so Setup can replace the executable. On macOS and Linux the app
 shows the verified archive for you to install. It never installs silently.
 *Check now* in Settings retries a failed check or looks for a just-published
 release. The release request contains no history or test results.
