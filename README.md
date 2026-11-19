@@ -38,10 +38,10 @@ hostname the app actually looked up.
    GeoIP databases and preserves
    your data when you install an update. The ZIP remains available as an
    alternative, but it does not include the databases.
-   In PowerShell you can download the installer to Downloads:
+   In PowerShell you can download the installer directly:
 
    ```powershell
-   curl.exe -fL --retry 3 -o "$HOME\Downloads\packettrail-windows-x64-setup.exe" https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
+   curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
    ```
 
    Verify its SHA-256 against the published `SHA256SUMS.txt` before running it.
@@ -82,7 +82,7 @@ computers will accept it.
 - **Download from the official release:** use the links above. Compare the
   downloaded archive's SHA-256 with its entry in the release's
   `SHA256SUMS.txt`. On Windows, for example, run
-  `Get-FileHash "$HOME\Downloads\packettrail-windows-x64-setup.exe" -Algorithm SHA256`.
+  `Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256`.
   A matching checksum confirms the archive matches the published download;
   it is not a security scan or a guarantee that the app is safe.
 - **First-run warnings:** the operating system may offer an option to approve
@@ -538,17 +538,17 @@ settings live in `~/Library/Application Support/packettrail`.
 
 **Linux** (x86-64 or arm64):
 
-To download the x64 archive into Downloads:
+To download the x64 archive with curl:
 
 ```bash
-curl -fL --retry 3 -o "$HOME/Downloads/packettrail-linux-x64.tar.gz" https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz
+curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz
 ```
 
 For ARM64, replace `x64` with `arm64` in the download and extract
 commands. Then extract and run:
 
 ```bash
-tar xzf "$HOME/Downloads/packettrail-linux-x64.tar.gz"
+tar xzf packettrail-linux-x64.tar.gz
 cd packettrail-linux-x64
 ./packettrail --install       # adds PacketTrail to your applications menu, then start it from there
 ./packettrail                 # or run it directly
