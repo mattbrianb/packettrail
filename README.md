@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.3.1 · MIT licence ·
+By Matthew Burnett · version 1.4.0 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -23,7 +23,9 @@ hostname the app actually looked up.
   for ISP detection, at most every 6 hours); and the free DB-IP Lite GeoIP
   databases (about 135 MB), included in the Windows installer. Updates
   download only when you click *Settings → Download latest*. On macOS and
-  Linux, use that button once if the databases are missing.
+  Linux, use that button once if the databases are missing. PacketTrail also
+  checks its public GitHub release metadata at launch and every 12 hours;
+  update files download only after you choose them in Settings.
 
 ## Quick start (Windows)
 
@@ -427,6 +429,21 @@ need it.
 History is stored at 5-minute resolution for two days, then rolled up into
 hourly buckets. Data older than `--retention` days is deleted. Growth is
 estimated (not yet measured) at a few MB per busy day.
+
+## App updates
+
+PacketTrail checks the public GitHub release at launch and every 12 hours. When
+there is a newer stable version, a notice appears above the dashboard. Open it
+to read the release notes. *Download update* saves the build for your platform
+in your Downloads folder (or the local data folder's `updates` subfolder when
+Downloads is unavailable) and verifies it against the SHA-256 digest
+published with that release. This checks the file against GitHub's release
+metadata; the app is not independently code-signed. Windows can then run the
+installer from the app;
+the monitor closes so the installer can replace it. On macOS and Linux the app
+shows the verified archive for you to install. It never installs silently.
+*Check now* in Settings retries a failed check or looks for a just-published
+release. The release request contains no history or test results.
 
 ## Data folder
 

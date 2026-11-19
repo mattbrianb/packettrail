@@ -177,6 +177,23 @@ try {
   await screenshot(join(root, 'dist', 'qa', 'route-map-mobile.png'));
   await writeFile(join(root, 'dist', 'qa', 'map-checks.json'), JSON.stringify(mapChecks,null,2));
   console.log('Map and PeeringDB error/recovery checks passed', mapChecks);
+  status.update = { version: '1.5.0', available: true, notes: 'A safer update flow.\n<script>Release notes stay text</script>', checking: false, downloading: false, downloaded: 0, size: 123456, assetReady: true };
+  await viewport(1100, 800, 'dark');
+  await navigate(`${baseUrl}/?notour&tab=apps`);
+  const updateCheck = await evaluate(`(() => {
+    const banner = document.querySelector('#updateBanner');
+    document.querySelector('#updateView').click();
+    const notes = document.querySelector('#updateNotes');
+    return { visible: !banner.hidden, settingsOpen: document.querySelector('#settings').open, notes: notes.textContent, injected: !!notes.querySelector('script'), button: document.querySelector('#updateDownload').textContent };
+  })()`);
+  if (!updateCheck.visible || !updateCheck.settingsOpen || updateCheck.injected || !updateCheck.notes.includes('<script>') || updateCheck.button !== 'Download update') throw new Error('Update notice or release notes failed: ' + JSON.stringify(updateCheck));
+  await screenshot(join(root, 'dist', 'qa', 'update-desktop.png'));
+  await viewport(390, 844, 'dark');
+  const mobileUpdate = await evaluate(`(() => { const b=document.querySelector('#updateBanner').getBoundingClientRect(); return {right:b.right, width:innerWidth, notes:document.querySelector('#updateNotes').textContent}; })()`);
+  if (mobileUpdate.right > mobileUpdate.width + 1) throw new Error('Update banner overflows mobile viewport: ' + JSON.stringify(mobileUpdate));
+  await screenshot(join(root, 'dist', 'qa', 'update-mobile.png'));
+  console.log('Update notice and escaped release notes verified:', JSON.stringify(updateCheck));
+  status.update = undefined;
   const checks = [];
   for (const [width, height, name] of [[1440, 1000, 'desktop'], [390, 844, 'mobile']]) {
     await viewport(width, height, 'dark');

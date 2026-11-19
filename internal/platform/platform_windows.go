@@ -70,6 +70,10 @@ func OpenURL(url string) error {
 	return exec.Command("explorer.exe", url).Start()
 }
 
+// OpenUpdate starts a verified installer through Explorer so an elevated
+// monitor does not pass its admin token to the per-user installer.
+func OpenUpdate(path string) error { return exec.Command("explorer.exe", path).Start() }
+
 // DownloadsDir returns the user's Downloads folder.
 func DownloadsDir() string {
 	if p, err := windows.KnownFolderPath(windows.FOLDERID_Downloads, 0); err == nil && p != "" {

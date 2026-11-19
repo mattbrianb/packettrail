@@ -16,3 +16,13 @@ data/
 .impeccable/
 .vscode/
 .idea/
+
+# Local configuration and signing material must never enter the public repo.
+.env
+.env.*
+*.pfx
+*.p12
+*.pem
+*.key
+*.sqlite
+*.sqlite3

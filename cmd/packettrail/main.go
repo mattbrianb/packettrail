@@ -28,10 +28,11 @@ import (
 	"packettrail/internal/store"
 	"packettrail/internal/sysmon"
 	"packettrail/internal/tools"
+	"packettrail/internal/updater"
 	"packettrail/internal/web"
 )
 
-var version = "1.3.1"
+var version = "1.4.0"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).
@@ -313,8 +314,15 @@ func run(c config) error {
 	var shutOnce sync.Once
 	stop := func() { shutOnce.Do(func() { close(shutdown); platform.CloseWindow() }) }
 
+	updateDir := platform.DownloadsDir()
+	if updateDir == "" {
+		updateDir = filepath.Join(c.dataDir, "updates")
+	}
+	updates := updater.New(version, updateDir)
+	go updates.Run(ctx)
 	opts := web.Options{
 		System:     sys,
+		Updater:    updates,
 		Version:    version,
 		Copyright:  copyright,
 		HostName:   map[bool]string{true: "DEMO-PC"}[c.demo],
@@ -334,6 +342,15 @@ func run(c config) error {
 	}
 	if opts.ExportDir == "" {
 		opts.ExportDir = filepath.Join(c.dataDir, "exports")
+	}
+	opts.OpenUpdate = func(path string) error {
+		if err := platform.OpenUpdate(path); err != nil {
+			return err
+		}
+		if runtime.GOOS == "windows" {
+			go func() { time.Sleep(500 * time.Millisecond); stop() }()
+		}
+		return nil
 	}
 	if opts.CanElevate {
 		opts.Elevate = func() error {

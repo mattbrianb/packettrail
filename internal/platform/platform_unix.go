@@ -44,6 +44,10 @@ func OpenURL(url string) error {
 	return exec.Command(opener, url).Start()
 }
 
+// OpenUpdate reveals the verified archive. The user chooses when and where
+// to replace the app on macOS and Linux.
+func OpenUpdate(path string) error { return Reveal(path) }
+
 // DownloadsDir returns ~/Downloads (of the sudo-invoking user if any), or "".
 func DownloadsDir() string {
 	home, _ := os.UserHomeDir()

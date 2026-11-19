@@ -2,6 +2,7 @@
 package web
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"io"
@@ -23,6 +24,7 @@ import (
 	"packettrail/internal/peering"
 	"packettrail/internal/store"
 	"packettrail/internal/sysmon"
+	"packettrail/internal/updater"
 )
 
 //go:embed static
@@ -48,6 +50,8 @@ type Options struct {
 	Peering    *peering.Detector
 	PeeringDB  *peering.Client
 	System     *sysmon.Sampler
+	Updater    *updater.Manager
+	OpenUpdate func(string) error
 }
 
 // External links the dashboard may open in the system browser.
@@ -269,6 +273,41 @@ func (s *Server) Handler() http.Handler {
 		}
 		writeJSON(w, map[string]any{"step": p.Step, "since": since, "points": pts})
 	})
+	mux.HandleFunc("POST /api/update/check", func(w http.ResponseWriter, r *http.Request) {
+		if s.opts.Updater == nil {
+			writeErr(w, 503, "updates unavailable")
+			return
+		}
+		go s.opts.Updater.Check(context.Background(), true)
+		writeJSON(w, map[string]bool{"started": true})
+	})
+	mux.HandleFunc("POST /api/update/download", func(w http.ResponseWriter, r *http.Request) {
+		if s.opts.Updater == nil {
+			writeErr(w, 503, "updates unavailable")
+			return
+		}
+		if err := s.opts.Updater.StartDownload(context.Background()); err != nil {
+			writeErr(w, 409, err.Error())
+			return
+		}
+		writeJSON(w, map[string]bool{"started": true})
+	})
+	mux.HandleFunc("POST /api/update/open", func(w http.ResponseWriter, r *http.Request) {
+		if s.opts.Updater == nil || s.opts.OpenUpdate == nil {
+			writeErr(w, 503, "updates unavailable")
+			return
+		}
+		path, err := s.opts.Updater.ReadyPath()
+		if err != nil {
+			writeErr(w, 409, err.Error())
+			return
+		}
+		if err := s.opts.OpenUpdate(path); err != nil {
+			writeErr(w, 500, err.Error())
+			return
+		}
+		writeJSON(w, map[string]bool{"ok": true})
+	})
 	mux.HandleFunc("POST /api/geo/update", func(w http.ResponseWriter, r *http.Request) {
 		if s.enr.Downloading.Load() {
 			writeErr(w, 409, "download already running")
@@ -355,7 +394,12 @@ func (s *Server) hostname() string {
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	in, out, rate, events := s.eng.Totals()
 	host := s.hostname()
+	var update any
+	if s.opts.Updater != nil {
+		update = s.opts.Updater.Status()
+	}
 	writeJSON(w, map[string]any{
+		"update":     update,
 		"app":        "packettrail",
 		"version":    s.opts.Version,
 		"copyright":  s.opts.Copyright,

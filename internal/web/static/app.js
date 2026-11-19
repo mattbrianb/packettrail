@@ -1651,8 +1651,39 @@ async function loadStatus() {
     : geo.city ? `GeoIP ${geo.cityDate || ''} · ASN ${geo.asnDate || ''}`
     : geo.error ? 'GeoIP download failed. Open Settings to retry.' : 'No GeoIP database. Open Settings to download one.';
   $('#footData').textContent = `History ${fmtBytes(s.dbSize)} · ${s.dataDir}`;
+  renderUpdate(s.update || {}, s);
   if ($('#settings').open) fillSettings();
   maybeStartTour();
+}
+
+function renderUpdate(u, s) {
+  const banner = $('#updateBanner');
+  banner.hidden = !u.available;
+  if (u.available) $('#updateBannerText').textContent = `PacketTrail ${u.version} is available · you have ${s.version}`;
+  const title = $('#updateTitle'), summary = $('#updateSummary');
+  $('#updateCheck').disabled = !!u.checking;
+  if (u.checking) {
+    title.textContent = 'Checking for updates…';
+    summary.textContent = 'Looking at the latest public PacketTrail release.';
+  } else if (u.available) {
+    title.textContent = `PacketTrail ${u.version} available`;
+    summary.textContent = u.assetReady ? `You have ${s.version}. Review the changes, then download the verified ${s.os === 'windows' ? 'installer' : 'archive'}.` : 'This release is still being packaged for your computer. Check again shortly.';
+  } else if (u.error) {
+    title.textContent = 'Could not check for updates';
+    summary.textContent = u.error;
+  } else {
+    title.textContent = `PacketTrail ${s.version} is up to date`;
+    summary.textContent = 'Checks GitHub at launch and every 12 hours. You can check again now.';
+  }
+  $('#updateDetails').hidden = !u.available;
+  if (!u.available) return;
+  $('#updateNotes').textContent = u.notes || 'No release notes provided.';
+  const downloading = !!u.downloading;
+  $('#updateDownload').disabled = !u.assetReady || downloading || !!u.path;
+  $('#updateDownload').textContent = downloading ? 'Downloading…' : u.path ? 'Downloaded and verified' : 'Download update';
+  $('#updateOpen').hidden = !u.path;
+  $('#updateOpen').textContent = s.os === 'windows' ? 'Run installer' : 'Show downloaded archive';
+  $('#updateProgress').textContent = u.error || (downloading && u.size ? `${Math.floor(100 * u.downloaded / u.size)}% of ${fmtBytes(u.size)} downloaded` : u.path ? `Verified download: ${u.path}${s.os === 'windows' ? ' · the app will close when the installer opens.' : ' · open the archive to install the new version.'}` : 'The download is checked against the SHA-256 digest published with the release.');
 }
 
 function fillSettings() {
@@ -3089,6 +3120,21 @@ function setUnits() {
   appChart.draw();
 }
 $('#settingsBtn').addEventListener('click', () => { fillSettings(); renderPalettes(); $('#settings').showModal(); invalidate('status'); });
+$('#updateView').addEventListener('click', () => { fillSettings(); renderPalettes(); $('#settings').showModal(); $('#updateTitle').scrollIntoView({ block: 'nearest' }); });
+$('#updateCheck').addEventListener('click', async () => {
+  try { await post('/api/update/check'); toast('Checking for a new PacketTrail release…'); }
+  catch (e) { toast('Update check failed: ' + e.message); }
+  invalidate('status');
+});
+$('#updateDownload').addEventListener('click', async () => {
+  try { await post('/api/update/download'); toast('Downloading and verifying the update…'); }
+  catch (e) { toast('Update download failed: ' + e.message); }
+  invalidate('status');
+});
+$('#updateOpen').addEventListener('click', async () => {
+  try { await post('/api/update/open'); toast(state.status?.os === 'windows' ? 'Opening the installer…' : 'Showing the downloaded archive…'); }
+  catch (e) { toast('Could not open update: ' + e.message); }
+});
 $('#geoUpdate').addEventListener('click', async () => {
   try {
     await post('/api/geo/update');

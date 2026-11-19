@@ -64,6 +64,11 @@
   </button>
 </header>
 
+<div class="update-banner" id="updateBanner" hidden role="status">
+  <span id="updateBannerText"></span>
+  <button type="button" class="btn sm" id="updateView">View update</button>
+</div>
+
 <section class="hero card" aria-label="Machine-wide traffic">
     <div class="metrics">
       <div class="metric rx">
@@ -359,6 +364,25 @@
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </div>
+    <div class="group-label">App updates</div>
+    <div class="group">
+      <div class="row update-top">
+        <div class="row-main">
+          <strong id="updateTitle">Checking for updates…</strong>
+          <span class="row-note" id="updateSummary">Checks the public PacketTrail release on GitHub at launch and every 12 hours.</span>
+        </div>
+        <button type="button" class="btn" id="updateCheck">Check now</button>
+      </div>
+      <div class="update-details" id="updateDetails" hidden>
+        <div class="update-notes-title">What changed</div>
+        <div class="update-notes" id="updateNotes"></div>
+        <div class="update-actions">
+          <button type="button" class="btn primary" id="updateDownload">Download update</button>
+          <button type="button" class="btn" id="updateOpen" hidden>Open downloaded update</button>
+        </div>
+        <p class="row-note" id="updateProgress" role="status"></p>
+      </div>
+    </div>
     <div class="group-label">Capture</div>
     <dl class="group" id="statusList"></dl>
     <div class="group-label">Storage</div>
@@ -503,6 +527,7 @@
           <li>Anonymous PeeringDB lookups by AS number, on the Peering tab.</li>
           <li>The probes you start: diagnostics, monitors and the route map. ISP detection also sends a few pings towards 1.1.1.1, at most every 6 hours.</li>
           <li>The free DB-IP Lite GeoIP databases: included with the Windows installer, or downloaded only when you click <i>Download latest</i> in Settings.</li>
+          <li>Public PacketTrail release metadata from GitHub, checked at launch and every 12 hours. An update file downloads only when you click <i>Download update</i>. History and test results are never sent.</li>
         </ul>
         <p>History, settings and test results stay on this PC.</p>
       </section>
@@ -520,7 +545,7 @@
       <section id="help-about">
         <h4>About</h4>
         <p><b>PacketTrail</b> <span id="helpVersion"></span><br><span id="helpCopy">© 2026 Matthew Burnett</span></p>
-        <p>The full manual is <code>README.md</code> in the app's folder. Settings shows the capture status, storage and GeoIP databases.</p>
+        <p>The full manual is <code>README.md</code> in the app's folder. Settings shows the capture status, app updates, storage and GeoIP databases.</p>
       </section>
     </div>
   </div>

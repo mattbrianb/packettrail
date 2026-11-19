@@ -29,7 +29,7 @@ Success means two things:
 
 ## Positioning
 
-PacketTrail is one self-contained executable with nothing to install and nothing sent to the cloud. It combines per-app bandwidth with network-operator context: who owns each IP, which networks and peering exchanges the traffic crosses, and path quality. That pairing is what an ISP network engineer reaches for. It is free with no account, ads or telemetry, and the source is open.
+PacketTrail is a self-contained executable with an optional Windows installer. It sends no user traffic or history to the cloud. It combines per-app bandwidth with network-operator context: who owns each IP, which networks and peering exchanges the traffic crosses, and path quality. That pairing is what an ISP network engineer reaches for. It is free with no account, ads or telemetry, and the source is open.
 
 ## Operating Context
 
@@ -42,7 +42,7 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 
 - **Platforms:** Windows 10/11 x64 is the primary target. Linux (x64, ARM64) and macOS (Apple silicon, Intel) builds ship but are untested on real machines.
 - **Lookups:** location and ASN come offline from the DB-IP Lite databases (CC BY 4.0), about 135 MB, included in the Windows installer or downloaded on request in Settings.
-- **What leaves the PC:** reverse DNS to the user's own DNS server, anonymous PeeringDB lookups by AS number, the tests the user starts, and GeoIP updates requested in Settings.
+- **What leaves the PC:** reverse DNS to the user's own DNS server, anonymous PeeringDB lookups by AS number, the tests the user starts, GeoIP updates requested in Settings, and a GitHub release metadata check at launch and every 12 hours. Update archives download only when requested.
 - **Signing:** the exe is not code-signed, so Windows may warn or block it on first run. The macOS app is ad-hoc signed but not notarised.
 - **Distribution:** the website is static HTML/CSS/JS on GitHub Pages from `docs/`, with no build step. Downloads are GitHub Releases with version-less asset names, linked as `releases/latest/download/<name>`.
 - **Cost:** no paid services, hosting or certificates.
@@ -68,6 +68,6 @@ PacketTrail is one self-contained executable with nothing to install and nothing
 ## Product Principles
 
 1. **Show the cause, not just the symptom:** which app, which remote network, which path.
-2. **Private and portable by default:** nothing to install, nothing sent anywhere the user didn't start.
+2. **Private and portable by default:** the portable build needs no installer. A public release check runs automatically; private history and traffic never leave the PC.
 3. **Speak both languages:** a plain answer first, with the engineer's detail one click away.
 4. **Free and honest:** no upsell and no claims beyond what the app does.
