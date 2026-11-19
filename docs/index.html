@@ -286,11 +286,11 @@
           </a>
           <span class="fine">Version 1.4.1 · installer · includes offline GeoIP data</span>
           <div class="cmd">
-            <code id="win-curl">curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
-if ($LASTEXITCODE -eq 0) { Write-Host ("Downloaded to: " + (Resolve-Path -LiteralPath .\packettrail-windows-x64-setup.exe).Path) }</code>
+            <code id="win-curl">cd ~/Downloads
+curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
             <button type="button" class="btn primary" data-copy="win-curl" aria-live="polite">Copy</button>
           </div>
-          <span class="fine">PowerShell command for a direct download. Check its SHA-256 below before running it. Security software and device policy may still block the file.</span>
+          <span class="fine">PowerShell command saves the installer to Downloads. Check its SHA-256 below before running it. Security software and device policy may still block the file.</span>
         </div>
         <div class="dl-main" data-for="macos">
           <div class="cmd">
@@ -311,8 +311,10 @@ if ($LASTEXITCODE -eq 0) { Write-Host ("Downloaded to: " + (Resolve-Path -Litera
           </a>
           <span class="fine" data-arch-for="x64">Version 1.4.1 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
           <span class="fine" data-arch-for="arm64">Version 1.4.1 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
-          <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">curl -fL --retry 3 -o packettrail-linux-x64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz &amp;&amp; printf 'Downloaded to: %s\n' "$PWD/packettrail-linux-x64.tar.gz"</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
-          <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">curl -fL --retry 3 -o packettrail-linux-arm64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz &amp;&amp; printf 'Downloaded to: %s\n' "$PWD/packettrail-linux-arm64.tar.gz"</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
+          <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">cd ~/Downloads
+curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
+          <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">cd ~/Downloads
+curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
         </div>
       </div>
 

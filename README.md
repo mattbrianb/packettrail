@@ -38,11 +38,11 @@ hostname the app actually looked up.
    GeoIP databases and preserves
    your data when you install an update. The ZIP remains available as an
    alternative, but it does not include the databases.
-   In PowerShell you can download the installer directly:
+   In PowerShell you can download the installer to Downloads:
 
    ```powershell
-   curl.exe -fL --retry 3 -o packettrail-windows-x64-setup.exe https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
-   if ($LASTEXITCODE -eq 0) { Write-Host ("Downloaded to: " + (Resolve-Path -LiteralPath .\packettrail-windows-x64-setup.exe).Path) }
+   cd ~/Downloads
+   curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe
    ```
 
    Verify its SHA-256 against the published `SHA256SUMS.txt` before running it.
@@ -539,10 +539,11 @@ settings live in `~/Library/Application Support/packettrail`.
 
 **Linux** (x86-64 or arm64):
 
-To download the x64 archive with curl and print where it was saved:
+To download the x64 archive into Downloads:
 
 ```bash
-curl -fL --retry 3 -o packettrail-linux-x64.tar.gz https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz && printf 'Downloaded to: %s\n' "$PWD/packettrail-linux-x64.tar.gz"
+cd ~/Downloads
+curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz
 ```
 
 For ARM64, replace `x64` with `arm64` in the download and extract
