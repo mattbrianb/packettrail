@@ -199,7 +199,7 @@ try {
     await viewport(width, height, 'dark');
     await navigate(baseUrl + '/site/');
     await screenshot(join(root, 'dist', 'qa', `website-${name}.png`));
-    checks.push(await evaluate(`({width: innerWidth, overflow: document.documentElement.scrollWidth > innerWidth, title: document.title, brokenImages: [...document.images].filter(i => i.complete && i.naturalWidth === 0).map(i => i.src), donation: [...document.links].some(a => a.href.includes('paypal.me/matthewbrianburnett')), branding: document.body.innerText.includes('PacketTrail')})`));
+    checks.push(await evaluate(`(() => { const donate = document.querySelector('.donate-header'); return {width: innerWidth, overflow: document.documentElement.scrollWidth > innerWidth, title: document.title, brokenImages: [...document.images].filter(i => i.complete && i.naturalWidth === 0).map(i => i.src), donation: [...document.links].some(a => a.href.includes('paypal.me/matthewbrianburnett')), headerDonate: !!donate && !donate.hidden && donate.href === 'https://paypal.me/matthewbrianburnett' && donate.getBoundingClientRect().right <= innerWidth, branding: document.body.innerText.includes('PacketTrail')}; })()`));
     const toggles = await evaluate(`[...document.querySelectorAll('.seg button')].map(b=>({text:b.textContent.trim(), value:b.dataset.reg}))`);
     console.log(name, JSON.stringify(checks.at(-1)), JSON.stringify(toggles));
     await evaluate(`document.querySelector('.seg button:last-child').click()`);
@@ -209,7 +209,7 @@ try {
   await viewport(1440, 1000, 'light');
   await navigate(baseUrl + '/site/');
   await screenshot(join(root, 'dist', 'qa', 'website-light.png'));
-  if (checks.some(c => c.overflow || c.brokenImages.length || !c.donation || !c.branding)) throw new Error('Website layout or content check failed: ' + JSON.stringify(checks));
+  if (checks.some(c => c.overflow || c.brokenImages.length || !c.donation || !c.headerDonate || !c.branding)) throw new Error('Website layout or content check failed: ' + JSON.stringify(checks));
   if (errors.length) throw new Error('Browser errors: ' + errors.join('\n'));
   await writeFile(join(root, 'dist', 'qa', 'checks.json'), JSON.stringify({ checks, errors }, null, 2));
   console.log('Dashboard captures and desktop/mobile website checks passed.');

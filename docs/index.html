@@ -36,6 +36,10 @@
       <a href="#support">Support</a>
     </nav>
     <div class="top-end">
+      <a class="btn donate-header" data-donate="paypal" href="" aria-label="Donate to Matthew Burnett via PayPal" target="_blank" rel="noopener noreferrer" hidden>
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5.2 14.5H2.9a.4.4 0 0 1-.4-.46L4.3 2.4A.7.7 0 0 1 5 1.8h4.4c2.3 0 3.6 1.2 3.3 3.2-.4 2.6-2.2 3.6-4.5 3.6H6.9a.6.6 0 0 0-.6.5l-.6 4.9a.6.6 0 0 1-.5.5Z"/></svg>
+        <span>Donate<span class="donate-via"> via PayPal</span></span>
+      </a>
       <div class="seg reg-switch compact" role="radiogroup" aria-label="Explain things">
         <button type="button" role="radio" data-set="plain">Plain</button>
         <button type="button" role="radio" data-set="eng">Engineer</button>
@@ -387,7 +391,7 @@ Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256</code></pre>
         <p>No ads, no upsell, no paid tier. If it saved you an evening of guessing, a donation helps keep it going.</p>
       </div>
       <div class="donate">
-        <a class="btn donate-btn" data-donate="paypal" href="" hidden>
+        <a class="btn primary donate-btn" data-donate="paypal" href="" target="_blank" rel="noopener noreferrer" hidden>
           <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5.2 14.5H2.9a.4.4 0 0 1-.4-.46L4.3 2.4A.7.7 0 0 1 5 1.8h4.4c2.3 0 3.6 1.2 3.3 3.2-.4 2.6-2.2 3.6-4.5 3.6H6.9a.6.6 0 0 0-.6.5l-.6 4.9a.6.6 0 0 1-.5.5Z"/></svg>
           Donate with PayPal
         </a>
@@ -412,8 +416,9 @@ Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256</code></pre>
   const DONATE = { paypal: 'https://paypal.me/matthewbrianburnett', kofi: '', sponsors: '' };
   let any = false;
   for (const [k, url] of Object.entries(DONATE)) {
-    const a = document.querySelector(`[data-donate="${k}"]`);
-    if (a && url) { a.href = url; a.hidden = false; any = true; }
+    for (const a of document.querySelectorAll(`[data-donate="${k}"]`)) {
+      if (url) { a.href = url; a.hidden = false; any = true; }
+    }
   }
   document.querySelector('[data-donate-section]').hidden = !any;
   document.querySelectorAll('a[href="#support"]').forEach(a => { a.hidden = !any; });
