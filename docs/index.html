@@ -286,8 +286,7 @@
           </a>
           <span class="fine">Version 1.4.1 · installer · includes offline GeoIP data</span>
           <div class="cmd">
-            <code id="win-curl">cd ~/Downloads
-curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
+            <code id="win-curl">curl.exe -fL --retry 3 -o "$HOME\Downloads\packettrail-windows-x64-setup.exe" https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
             <button type="button" class="btn primary" data-copy="win-curl" aria-live="polite">Copy</button>
           </div>
           <span class="fine">PowerShell command saves the installer to Downloads. Check its SHA-256 below before running it. Security software and device policy may still block the file.</span>
@@ -311,10 +310,8 @@ curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/lat
           </a>
           <span class="fine" data-arch-for="x64">Version 1.4.1 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
           <span class="fine" data-arch-for="arm64">Version 1.4.1 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
-          <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">cd ~/Downloads
-curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
-          <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">cd ~/Downloads
-curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
+          <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">curl -fL --retry 3 -o "$HOME/Downloads/packettrail-linux-x64.tar.gz" https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
+          <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">curl -fL --retry 3 -o "$HOME/Downloads/packettrail-linux-arm64.tar.gz" https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
         </div>
       </div>
 
@@ -332,9 +329,9 @@ curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/
           <h3>First run on Linux</h3>
           <ol>
             <li>Extract it and go into the folder:
-              <pre data-arch-for="x64"><code>tar xzf packettrail-linux-x64.tar.gz
+              <pre data-arch-for="x64"><code>tar xzf "$HOME/Downloads/packettrail-linux-x64.tar.gz"
 cd packettrail-linux-x64</code></pre>
-              <pre data-arch-for="arm64"><code>tar xzf packettrail-linux-arm64.tar.gz
+              <pre data-arch-for="arm64"><code>tar xzf "$HOME/Downloads/packettrail-linux-arm64.tar.gz"
 cd packettrail-linux-arm64</code></pre>
             </li>
             <li>Run <code>./packettrail --install</code> to add PacketTrail to your apps menu, or start it with <code>./packettrail</code>. The app window needs WebKitGTK 4.1, which most desktops have; without it PacketTrail opens in your browser.</li>
@@ -359,9 +356,9 @@ cd packettrail-linux-arm64</code></pre>
           <h3>Check your download</h3>
           <p>Every release lists SHA-256 checksums in <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/SHA256SUMS.txt">SHA256SUMS.txt</a>. <span data-for="windows">In PowerShell:</span><span data-for="macos">The Terminal command checks it for you. For a zip:</span><span data-for="linux">In a terminal:</span></p>
           <pre data-for="windows"><code>curl.exe -fL -o SHA256SUMS.txt https://github.com/mattbrianb/packettrail/releases/latest/download/SHA256SUMS.txt
-Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256</code></pre>
+Get-FileHash "$HOME\Downloads\packettrail-windows-x64-setup.exe" -Algorithm SHA256</code></pre>
           <pre data-for="macos"><code>shasum -a 256 packettrail-macos-*.zip</code></pre>
-          <pre data-for="linux"><code>sha256sum packettrail-linux-*.tar.gz</code></pre>
+          <pre data-for="linux"><code>sha256sum "$HOME"/Downloads/packettrail-linux-*.tar.gz</code></pre>
           <p class="fine">Release notes for every version are on <a href="https://github.com/mattbrianb/packettrail/releases">GitHub Releases</a>.</p>
         </div>
         <div class="panel platforms">
