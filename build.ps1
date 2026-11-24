@@ -2,7 +2,7 @@
 # portable Go toolchain in .\.toolchain (falls back to a "go" on PATH).
 #   .\build.ps1              # test + build all targets
 #   .\build.ps1 -SkipTests   # build only
-param([string]$Version = "1.4.1", [switch]$SkipTests)
+param([string]$Version = "1.5.0", [switch]$SkipTests)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $tc = Join-Path $root '.toolchain'
@@ -39,7 +39,9 @@ try {
         $env:GOOS = $t.os
         $env:GOARCH = $t.arch
         Write-Host "building $($t.os)/$($t.arch) -> $($t.out)"
-        & $go build -trimpath -ldflags "-s -w -X main.version=$Version" -o $t.out ./cmd/packettrail
+        $linkFlags = "-s -w -X main.version=$Version"
+        if ($t.os -eq 'windows') { $linkFlags += ' -H=windowsgui' }
+        & $go build -trimpath -ldflags $linkFlags -o $t.out ./cmd/packettrail
         if ($LASTEXITCODE) { throw "build failed for $($t.os)/$($t.arch)" }
     }
     Copy-Item README.md dist\README.md -Force

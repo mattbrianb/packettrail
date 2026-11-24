@@ -33,6 +33,7 @@
       <a href="#what">Features</a>
       <a href="#privacy">Privacy</a>
       <a href="#download">Download</a>
+      <a href="#release-notes">Release notes</a>
       <a href="#support">Support</a>
     </nav>
     <div class="top-end">
@@ -89,9 +90,9 @@
           </a>
           <a class="btn" href="https://github.com/mattbrianb/packettrail">View the source</a>
         </div>
-        <p class="fine" data-for="windows">Free · version 1.4.1 · Windows 10 and 11, 64-bit · also <a href="#download">macOS and Linux</a></p>
-        <p class="fine" data-for="macos">Free · version 1.4.1 · Apple silicon and Intel · also <a href="#download">Windows and Linux</a></p>
-        <p class="fine" data-for="linux"><span data-arch-for="x64">Free · version 1.4.1 · x64</span><span data-arch-for="arm64">Free · version 1.4.1 · ARM64</span> · also <a href="#download">Windows and macOS</a></p>
+        <p class="fine" data-for="windows">Free · version 1.5.0 · Windows 10 and 11, 64-bit · also <a href="#download">macOS and Linux</a></p>
+        <p class="fine" data-for="macos">Free · version 1.5.0 · Apple silicon and Intel · also <a href="#download">Windows and Linux</a></p>
+        <p class="fine" data-for="linux"><span data-arch-for="x64">Free · version 1.5.0 · x64</span><span data-arch-for="arm64">Free · version 1.5.0 · ARM64</span> · also <a href="#download">Windows and macOS</a></p>
       </div>
 
       <div class="stage" id="demo" role="img" aria-label="Demo of PacketTrail with demo data: steam.exe climbs to the top of the Applications table at about 48 Mbps, and PacketTrail shows it is talking to Valve's servers in Frankfurt.">
@@ -280,7 +281,7 @@
         <div>
           <h2>Download PacketTrail</h2>
           <p data-for="windows">Free and open source. The installer includes offline location and ASN databases. Your history and databases stay in your user folder when you update. Close PacketTrail before a manual reinstall; an update opened from the app closes it for you.</p>
-          <p data-for="macos">Free and open source. One line in Terminal puts PacketTrail in Applications and opens it, with no security prompt.</p>
+          <p data-for="macos">Free and open source. One line in Terminal puts PacketTrail in Applications and opens it, subject to your Mac’s security settings.</p>
           <p data-for="linux">Free, portable and open source. Extract it anywhere and run <code>./packettrail</code>. Nothing to install.</p>
         </div>
         <div class="dl-main" data-for="windows">
@@ -288,7 +289,7 @@
             <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Windows 10 / 11 · 64-bit
           </a>
-          <span class="fine">Version 1.4.1 · installer · includes offline GeoIP data</span>
+          <span class="fine">Version 1.5.0 · installer · includes offline GeoIP data</span>
           <div class="cmd">
             <code id="win-curl">curl.exe -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-windows-x64-setup.exe</code>
             <button type="button" class="btn primary" data-copy="win-curl" aria-live="polite">Copy</button>
@@ -300,7 +301,7 @@
             <code id="mac-cmd">curl -fsSL https://mattbrianb.github.io/packettrail/install.sh | bash</code>
             <button type="button" class="btn primary" data-copy="mac-cmd" aria-live="polite">Copy</button>
           </div>
-          <span class="fine">Version 1.4.1 · paste into Terminal · or the zip for <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip">Apple silicon</a> or <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip">Intel</a></span>
+          <span class="fine">Version 1.5.0 · paste into Terminal · or the zip for <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-arm64.zip">Apple silicon</a> or <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-macos-x64.zip">Intel</a></span>
           <span class="fine">The installer prints where PacketTrail.app is installed. Its ZIP download is temporary and removed after installation.</span>
         </div>
         <div class="dl-main" data-for="linux">
@@ -312,8 +313,8 @@
             <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Linux · ARM64
           </a>
-          <span class="fine" data-arch-for="x64">Version 1.4.1 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
-          <span class="fine" data-arch-for="arm64">Version 1.4.1 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
+          <span class="fine" data-arch-for="x64">Version 1.5.0 · tar.gz · about 6 MB · on ARM? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz">ARM64 build</a></span>
+          <span class="fine" data-arch-for="arm64">Version 1.5.0 · tar.gz · about 5.5 MB · on Intel or AMD? Get the <a href="https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz">x64 build</a></span>
           <div class="cmd" data-arch-for="x64"><code id="linux-x64-curl">curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-x64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-x64-curl" aria-live="polite">Copy</button></div>
           <div class="cmd" data-arch-for="arm64"><code id="linux-arm64-curl">curl -fL --retry 3 -O https://github.com/mattbrianb/packettrail/releases/latest/download/packettrail-linux-arm64.tar.gz</code><button type="button" class="btn primary" data-copy="linux-arm64-curl" aria-live="polite">Copy</button></div>
         </div>
@@ -384,6 +385,111 @@ Get-FileHash .\packettrail-windows-x64-setup.exe -Algorithm SHA256</code></pre>
     </div>
   </section>
 
+<section id="release-notes" class="wrap"><h2>Release notes</h2>
+<details open><summary>v1.5.0</summary><pre><code>Windows opens PacketTrail without a command prompt. The startup update notice opens release notes for each stable version since your installed version. Review the changes before downloading. The website now includes a release history.</code></pre></details>
+<details><summary>v1.4.1</summary><pre><code>## PacketTrail v1.4.1
+
+This release fixes the Windows reinstall problem reported with v1.4.0.
+
+- When you open a downloaded update inside PacketTrail, the app now stops capture, saves history, closes its local server and window, and releases the running-app marker before opening Setup. Setup can then replace the executable.
+- Setup now detects a running PacketTrail process and asks you to close it before replacing files. The download page and README explain how to handle a manual reinstall.
+- Your saved history, settings and existing GeoIP databases remain in the user data folder when Setup updates the app.
+
+**If v1.4.0 Setup is already showing “Access is denied”:** cancel that installation, close PacketTrail (end any remaining PacketTrail process in Task Manager), then run the v1.4.1 installer. Do not choose “Skip this file.”
+
+The Go tests and Windows build passed, and the executable version was checked on the development PC. The corrected installer handoff still needs a user reinstall check; macOS and Linux need real-device confirmation. It is unsigned and may still trigger operating system security prompts.</code></pre></details>
+<details><summary>v1.4.0</summary><pre><code>## What&#x27;s new in v1.4.0
+
+- PacketTrail now checks this repository&#x27;s latest stable release at launch and every 12 hours. A dashboard notice shows when an update is available; Settings shows the release notes and download progress.
+- Downloads start only when you choose **Download update**. PacketTrail verifies the downloaded file against the SHA-256 digest in GitHub&#x27;s release metadata before offering to open it. Windows opens the installer and closes the running monitor; macOS and Linux reveal the verified archive for installation.
+- Updates are saved in your Downloads folder when available. The app sends no traffic history or test results with the release check.
+- The public source and release packaging were audited for local history, logs, databases, credentials, and environment files; ignore rules now cover common private file types.
+
+Users of v1.3.1 need to install v1.4.0 once from this release. Later releases will appear in the app. PacketTrail is not independently code-signed or notarised, so operating system security prompts may still appear.</code></pre></details>
+<details><summary>v1.3.1</summary><pre><code>PacketTrail 1.3.1 adds a Windows installer with offline GeoIP data and corrects the bundled third-party notice.
+
+- History and GeoIP databases now live in a stable per-user folder across launches and updates.
+- The Windows installer includes validated DB-IP Lite City and ASN databases. It preserves existing databases during updates and uninstall.
+- GeoIP downloads happen only when you choose Settings → Download latest. On macOS, Linux and the portable Windows ZIP, use that button once if no databases are installed.
+- The website offers copyable curl commands for direct downloads. Compare SHA-256 with the published checksum before running the file. Command-line download does not bypass security software or device policy.
+
+The Windows installer is unsigned and may show a security warning. The macOS bundles are ad-hoc signed and are not notarised. The installer build now fetches and validates missing DB-IP seed files from DB-IP on a clean checkout.</code></pre></details>
+<details><summary>v1.3.0</summary><pre><code>PacketTrail 1.3.0 keeps history and GeoIP databases in a stable per-user folder across launches and app updates.
+
+- New Windows installer includes the offline DB-IP Lite City and ASN databases. Existing databases are preserved during updates and uninstall.
+- GeoIP data is downloaded only when you choose Settings → Download latest. On macOS, Linux, or the portable Windows ZIP, use that button once if no databases are installed.
+- Windows and Linux download pages now include copyable curl commands. Verify the published SHA-256 checksum before opening a downloaded file. A command-line download does not bypass security software or device policy.
+
+The Windows installer is unsigned and may show a Windows security warning. macOS bundles are built and attached by the release workflow.</code></pre></details>
+<details><summary>v1.2.0</summary><pre><code>## PacketTrail 1.2.0
+
+- Add a rotatable offline Globe alongside the flat route map, with drag, keyboard and zoom controls. Theme and viewing position stay consistent through live updates.
+- Recognise a curated set of common anycast DNS addresses and withhold precise location pins for them.
+- Flag database coordinates that conflict with earlier hop estimates and measured round-trip times. Suppress misleading geographic links while preserving original database locations in hop details.
+- Show qualified regional inferences only when supported by earlier low-latency hops. The map and hop table use the same location assessment.
+
+These are conservative plausibility checks, not verified router geolocation. The anycast list is not exhaustive. A likely country is not an exact city or serving site. No additional probes, accounts or external map requests are introduced.
+
+Validation includes the reported South Africa / 8.8.8.8 pattern, a US route, IPv6 anycast, missing coordinates, insufficient timing samples, the dateline, globe controls and live updates. Windows/Linux/macOS builds and native macOS checks are tracked in Actions.</code></pre></details>
+<details><summary>v1.1.0</summary><pre><code>## PacketTrail 1.1.0
+
+- Add an offline Map view to MTR and traceroute, with zoom, pan, keyboard controls, hop details and loss/latency indicators. No map account, tiles service or extra geolocation requests are required.
+- Preserve horizontal scrolling and map position during live diagnostic updates.
+- Include the macOS decimal-comma CPU parsing fix introduced in 1.0.2.
+- Report PeeringDB connection timeouts after 20 seconds, with connection guidance and automatic retries.
+
+Map locations are approximate IP geolocation estimates, not physical cable routes. Private, unanswered and unlocated hops are not placed on the map.
+
+Validation: clean-source Go vet/tests and all five platform builds; Chromium map, scrolling and error/recovery regression checks; native macOS WebKit map, horizontal scrolling and PeeringDB error/recovery tests. Live PeeringDB requests succeeded from the macOS runner. Network filtering can still prevent a particular computer from accessing PeeringDB.
+
+Free to use, with optional donations: https://paypal.me/matthewbrianburnett</code></pre></details>
+<details><summary>v1.0.2</summary><pre><code>## PacketTrail 1.0.2
+
+- Keep horizontal scrolling in place while MTR and traceroute results update, including when tests finish.
+- Fix macOS process CPU readings appearing as zero with decimal-comma regional settings. System commands now use a consistent numeric locale, and parsers accept both decimal formats.
+
+Validation: Go vet and tests passed, including a regression using decimal-comma CPU output. All five platform builds passed. Browser regression checks cover scrolling in both directions during repeated MTR/traceroute updates and completion. Native macOS trackpad behaviour still needs user confirmation.
+
+PeeringDB connectivity on the reported Mac is still under investigation; this release does not claim to resolve that timeout.</code></pre></details>
+<details><summary>v1.0.1</summary><pre><code>## PacketTrail 1.0.1
+
+- Correct publisher and copyright attribution to Matthew Burnett in the app, MIT licence, notices, website and platform metadata.
+- Show compact ASN labels in network path bands so long organisation names no longer get cut off.
+- Preserve the full ASN and organisation name on hover and in the detailed hop table.
+
+Validation: Go vet/tests and all five platform builds passed. Browser checks reproduced narrow bands with long organisation names, verified that labels fit and that complete hover titles remain available, and checked desktop/mobile website layouts.
+
+PacketTrail is free. Donations are optional: https://paypal.me/matthewbrianburnett</code></pre></details>
+<details><summary>v1.0.0</summary><pre><code># PacketTrail 1.0.0
+
+
+
+A free, portable per-application network monitor by Matthew Burnett. Donations are optional.
+
+
+
+- Live and historical traffic per app, remote IP and network.
+
+- Offline IP ownership and location lookups.
+
+- MTR, traceroute, ping, TCP checks and background monitors.
+
+- System resource monitoring, light/dark themes and CSV export.
+
+
+
+Download the archive for your platform, extract it and run PacketTrail. Windows administrator approval enables full per-app byte accounting; declining it keeps connections-only mode available.
+
+
+
+SHA-256 checksums are included. Windows is the primary platform; Linux and macOS runtime coverage remains limited. The macOS app bundles are attached automatically after the release workflow finishes.
+
+
+
+Website: https://mattbrianb.github.io/packettrail/
+
+Optional donation: https://paypal.me/matthewbrianburnett</code></pre></details>
+</section>
   <section class="support" id="support" data-donate-section hidden>
     <div class="wrap support-in">
       <div>

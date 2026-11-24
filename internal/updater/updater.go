@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -196,6 +197,7 @@ func (m *Manager) fetch(ctx context.Context) (State, asset, error) {
 	if len(st.Notes) > 8000 {
 		st.Notes = st.Notes[:8000] + "…"
 	}
+	st.Notes = m.history(ctx, rel.Tag, st.Notes)
 	st.Published = rel.Published
 	for _, a := range rel.Assets {
 		if a.Name == m.target && a.Size > 0 && a.Size <= maxAssetSize && digestPattern.MatchString(a.Digest) {
@@ -206,6 +208,53 @@ func (m *Manager) fetch(ctx context.Context) (State, asset, error) {
 		}
 	}
 	return st, selected, nil
+}
+
+// history keeps the latest release usable if GitHub cannot serve older notes.
+func (m *Manager) history(ctx context.Context, latest, body string) string {
+	current := "v" + strings.TrimPrefix(m.current, "v")
+	notes := map[string]string{latest: body}
+	for page := 1; ; page++ {
+		url := fmt.Sprintf("%s?per_page=30&page=%d", strings.TrimSuffix(m.apiURL, "/latest"), page)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			break
+		}
+		resp, err := m.client.Do(req)
+		if err != nil {
+			break
+		}
+		var releases []release
+		err = json.NewDecoder(io.LimitReader(resp.Body, 4<<20)).Decode(&releases)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK || err != nil {
+			break
+		}
+		for _, r := range releases {
+			newer, e1 := compareVersion(r.Tag, current)
+			upper, e2 := compareVersion(r.Tag, latest)
+			if !r.Draft && !r.Prerelease && e1 == nil && e2 == nil && newer > 0 && upper < 0 {
+				notes[r.Tag] = strings.TrimSpace(r.Body)
+			}
+		}
+		if len(releases) < 30 {
+			break
+		}
+	}
+	tags := make([]string, 0, len(notes))
+	for tag := range notes {
+		tags = append(tags, tag)
+	}
+	sort.Slice(tags, func(i, j int) bool { c, _ := compareVersion(tags[i], tags[j]); return c > 0 })
+	var sections []string
+	for _, tag := range tags {
+		note := notes[tag]
+		if note == "" {
+			note = "No release notes provided."
+		}
+		sections = append(sections, tag+"\n"+note)
+	}
+	return strings.Join(sections, "\n\n")
 }
 
 func (m *Manager) StartDownload(ctx context.Context) error {

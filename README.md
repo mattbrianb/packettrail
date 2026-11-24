@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.4.1 · MIT licence ·
+By Matthew Burnett · version 1.5.0 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -15,7 +15,7 @@ hostname the app actually looked up.
 - One self-contained executable per platform. Nothing to install, no runtime
   needed, no cgo.
 - Windows 10/11 x64 is the primary target. Linux and macOS builds are included
-  but untested (see [Linux and macOS](#linux-and-macos)).
+  (see [Linux and macOS](#linux-and-macos)).
 - Location and ASN lookups are offline (DB-IP Lite databases) and cached.
   What leaves the PC: reverse-DNS queries to your configured DNS server;
   anonymous PeeringDB lookups by AS number (Peering tab); the probes you start
@@ -92,10 +92,7 @@ computers will accept it.
   details and submit the file for review to your security software provider.
   Do not assume a detection is a false positive or disable protection to
   run the app. On a managed computer, ask your IT team to review it.
-- **Platform testing:** Windows has been tested by the publisher on the
-  development PC. Linux and macOS downloads are available, but real-device
-  testing of this release is still pending. Testing on a separate Windows
-  PC is also recommended before describing first-run behaviour as confirmed.
+- **Platform testing:** Matthew has tested PacketTrail on Windows and macOS. Linux desktop testing by users is still welcome.
 
 ## Using the dashboard
 
@@ -503,9 +500,7 @@ Enrichment covers every public IP:
 
 ## Linux and macOS
 
-> **Testing pending.** Linux and macOS builds are available, but this release
-> still needs real-device testing. Successful builds do not confirm runtime
-> behaviour or warning-free launches on either platform.
+> The publisher has tested PacketTrail on Windows and macOS. Linux desktop feedback is welcome.
 
 Both open the dashboard in **their own app window**, like on Windows, using
 the system's WebKit. If that can't start, PacketTrail uses a Chrome, Edge,

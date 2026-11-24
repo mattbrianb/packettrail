@@ -36,6 +36,8 @@ func TestVerifiedDownloadAndTamper(t *testing.T) {
 	assetName := "packettrail-windows-x64-setup.exe"
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case "/":
+			json.NewEncoder(w).Encode([]release{{Tag: "v1.3.2", Body: "Earlier fix"}, {Tag: "v1.3.1", Body: "Already installed"}, {Tag: "v1.3.3", Prerelease: true}})
 		case "/latest":
 			json.NewEncoder(w).Encode(release{Tag: "v1.4.0", Body: "Changes <must remain text>", Assets: []asset{{Name: assetName, Digest: fmt.Sprintf("sha256:%x", sum), Size: int64(len(payload))}}})
 		case "/v1.4.0/" + assetName:
@@ -53,7 +55,7 @@ func TestVerifiedDownloadAndTamper(t *testing.T) {
 		t.Fatal(err)
 	}
 	st := m.Status()
-	if !st.Available || !st.AssetReady || st.Notes != "Changes <must remain text>" {
+	if !st.Available || !st.AssetReady || st.Notes != "v1.4.0\nChanges <must remain text>\n\nv1.3.2\nEarlier fix" {
 		t.Fatalf("unexpected release: %+v", st)
 	}
 	if err := m.StartDownload(context.Background()); err != nil {
