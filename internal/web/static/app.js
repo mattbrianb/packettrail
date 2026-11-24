@@ -224,8 +224,7 @@ class Table {
   key(r) { return this.opts.rowKey ? this.opts.rowKey(r) : JSON.stringify(r); }
   setRows(rows) { this.rows = rows || []; this.render(); }
   value(c, r) { return c.sortVal ? c.sortVal(r) : r[c.key]; }
-  filtered() {
-    let rows = this.rows;
+  filtered(rows = this.rows) {
     if (this.opts.prefilter) rows = rows.filter(this.opts.prefilter);
     const terms = this.filter.trim().toLowerCase().split(/\s+/).filter(Boolean);
     if (terms.length) {
@@ -234,6 +233,9 @@ class Table {
         return terms.every(t => hay.includes(t));
       });
     }
+    return this.sorted(rows);
+  }
+  sorted(rows) {
     const col = this.cols.find(c => c.key === this.sort.key) || this.cols[0];
     const dir = this.sort.dir;
     const empty = v => v === undefined || v === null || v === '';
@@ -268,9 +270,10 @@ class Table {
     return { tr, html: [], tips: [], sel: false, xr: null, row: null };
   }
   render(force) {
-    const rows = this.filtered();
+    const filtered = this.filtered();
+    const rows = this.opts.displayRows ? this.opts.displayRows(filtered) : filtered;
     this.pending = !force && this.frozen();
-    this.updateCount(rows);
+    this.updateCount(this.opts.displayRows ? filtered : rows);
     if (this.pending) return;
     const cols = this.visible();
     const arrow = `<span class="arrow">${this.sort.dir > 0 ? '▲' : '▼'}</span>`;
@@ -2591,7 +2594,40 @@ function utilHtml(r) {
   const u = Math.max(r.rxUtil, r.txUtil);
   return `<span class="meter-cell">${meter(u, lvlOf(u, 70, 85))}<span>${fmtPct(u, u < 10 ? 1 : 0)}</span></span>`;
 }
+const openProcessGroups = new Set();
+function processDisplayRows(processes) {
+  const buckets = new Map();
+  for (const proc of processes) {
+    const key = proc.path || proc.name;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(proc);
+  }
+  const groups = [];
+  for (const [key, members] of buckets) {
+    if (members.length === 1) { groups.push(members[0]); continue; }
+    const total = { ...members[0], groupKey: key, pid: '', members };
+    for (const field of ['cpu','mem','io','netIn','netOut','threads','handles']) {
+      total[field] = members.some(p => p[field] < 0) ? -1 : members.reduce((sum,p) => sum + (p[field] || 0), 0);
+    }
+    groups.push(total);
+  }
+  // Processes were already filtered. Sort summaries using their totals.
+  const result = [];
+  for (const row of tables.procs.sorted(groups)) {
+    result.push(row);
+    if (row.members && openProcessGroups.has(row.groupKey)) {
+      for (const child of row.members) result.push({...child, child: true});
+    }
+  }
+  return result;
+}
+
 function procCell(r) {
+  if (r.members) {
+    const open = openProcessGroups.has(r.groupKey);
+    return `<button type="button" class="proc-toggle" aria-expanded="${open}">${open ? '▾' : '▸'} ${esc(r.name)} (${r.members.length})</button>`;
+  }
+  if (r.child) return `<span class="proc-child">${esc(r.name)}</span>`;
   if (r.app) return appCell(r.app, r.name);
   return `<span class="appcell"><span class="appicon"><span class="mono" style="${toneOf(r.name)}">${esc(initials(r.name))}</span></span><span class="nm">${esc(r.name)}</span></span>`;
 }
@@ -2631,7 +2667,18 @@ tables.procs = new Table('procs', [
   { key: 'threads', label: 'Threads', num: true, fmt: v => (v >= 0 ? v.toLocaleString() : '–') },
   { key: 'handles', label: 'Handles', num: true, fmt: v => (v >= 0 ? v.toLocaleString() : '–'), title: 'Open handles (files, sockets, registry keys…); a number that only ever grows is a leak' },
   { key: 'path', label: 'Path', hidden: true },
-], { sort: { key: 'cpu', dir: -1 }, rowKey: r => String(r.pid) });
+], { sort: { key: 'cpu', dir: -1 }, rowKey: r => r.members ? 'group:' + r.groupKey : String(r.pid), displayRows: processDisplayRows,
+  onSelect: row => {
+    if (!row.members) return;
+    if (openProcessGroups.has(row.groupKey)) openProcessGroups.delete(row.groupKey);
+    else openProcessGroups.add(row.groupKey);
+    tables.procs.render(true);
+  }
+});
+tables.procs.el.addEventListener('click', e => {
+  const button = e.target.closest('.proc-toggle');
+  if (button) tables.procs.activate(button.closest('tr').dataset.key);
+});
 
 // Small area sparkline on a canvas.
 function drawSpark(canvas, vals, token, max) {
