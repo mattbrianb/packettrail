@@ -32,7 +32,7 @@ import (
 	"packettrail/internal/web"
 )
 
-var version = "1.5.1"
+var version = "1.5.2"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).

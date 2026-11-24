@@ -1313,5 +1313,5 @@ kbd {
 .route-globe:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .map-controls [aria-pressed="true"] { background:var(--accent-soft); color:var(--accent); }
 
-.proc-toggle { color: inherit; font: inherit; background: transparent; border: 0; cursor: pointer; }
+.proc-toggle { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; color: inherit; font: inherit; background: transparent; border: 0; cursor: pointer; }
 .proc-child { padding-inline-start: 24px; }

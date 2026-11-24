@@ -2624,13 +2624,13 @@ function processDisplayRows(processes) {
 }
 
 function procCell(r) {
+  const key = r.app || r.members?.find(member => member.app)?.app;
+  const cell = key ? appCell(key, r.name) : `<span class="appcell"><span class="appicon"><span class="mono" style="${toneOf(r.name)}">${esc(initials(r.name))}</span></span><span class="nm">${esc(r.name)}</span></span>`;
   if (r.members) {
     const open = openProcessGroups.has(r.groupKey);
-    return `<button type="button" class="proc-toggle" aria-expanded="${open}">${open ? '▾' : '▸'} ${esc(r.name)} (${r.members.length})</button>`;
+    return `<button type="button" class="proc-toggle" aria-expanded="${open}"><span aria-hidden="true">${open ? '▾' : '▸'}</span>${cell} (${r.members.length})</button>`;
   }
-  if (r.child) return `<span class="proc-child">${esc(r.name)}</span>`;
-  if (r.app) return appCell(r.app, r.name);
-  return `<span class="appcell"><span class="appicon"><span class="mono" style="${toneOf(r.name)}">${esc(initials(r.name))}</span></span><span class="nm">${esc(r.name)}</span></span>`;
+  return r.child ? `<span class="proc-child">${cell}</span>` : cell;
 }
 
 tables.ifaces = new Table('ifaces', [
