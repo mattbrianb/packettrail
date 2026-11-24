@@ -1659,9 +1659,10 @@ async function loadStatus() {
   maybeStartTour();
 }
 
+let deferredUpdateVersion = "";
 function renderUpdate(u, s) {
   const banner = $('#updateBanner');
-  banner.hidden = !u.available;
+  banner.hidden = !u.available || deferredUpdateVersion === u.version;
   if (u.available) $('#updateBannerText').textContent = `PacketTrail ${u.version} is available · you have ${s.version}`;
   const title = $('#updateTitle'), summary = $('#updateSummary');
   $('#updateCheck').disabled = !!u.checking;
@@ -3168,6 +3169,14 @@ function setUnits() {
 }
 $('#settingsBtn').addEventListener('click', () => { fillSettings(); renderPalettes(); $('#settings').showModal(); invalidate('status'); });
 $('#updateView').addEventListener('click', () => { fillSettings(); renderPalettes(); $('#settings').showModal(); $('#updateTitle').scrollIntoView({ block: 'nearest' }); });
+function deferUpdate() {
+  deferredUpdateVersion = state.status?.update?.version || '';
+  $('#updateBanner').hidden = true;
+  if ($('#settings').open) $('#settings').close();
+  invalidate('live', 'apps');
+}
+$('#updateLater').addEventListener('click', deferUpdate);
+$('#updateBannerLater').addEventListener('click', deferUpdate);
 $('#updateCheck').addEventListener('click', async () => {
   try { await post('/api/update/check'); toast('Checking for a new PacketTrail release…'); }
   catch (e) { toast('Update check failed: ' + e.message); }

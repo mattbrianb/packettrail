@@ -21,6 +21,15 @@ const dbipURL = "https://download.db-ip.com/free/dbip-%s-lite-%s.mmdb.gz"
 // Download fetches the latest DB-IP Lite City and ASN databases into the
 // data directory, then reloads them. It is safe to call from a goroutine.
 func (e *Enricher) Download() error {
+	return e.download(context.Background(), false)
+}
+
+// RefreshAfterUpgrade keeps current databases and user-supplied alternatives.
+func (e *Enricher) RefreshAfterUpgrade(ctx context.Context) error {
+	return e.download(ctx, true)
+}
+
+func (e *Enricher) download(ctx context.Context, staleOnly bool) error {
 	if !e.Downloading.CompareAndSwap(false, true) {
 		return fmt.Errorf("download already running")
 	}
@@ -32,10 +41,23 @@ func (e *Enricher) Download() error {
 		now := time.Now().UTC()
 		ok := false
 		// A new month's file appears a few days into the month; fall back.
-		for _, m := range []time.Time{now, now.AddDate(0, -1, 0)} {
+		status := e.Status()
+		file, date := status.ASN, status.ASNDate
+		if kind == "city" {
+			file, date = status.City, status.CityDate
+		}
+		if staleOnly && file != "" && file != "dbip-"+kind+"-lite.mmdb" {
+			continue
+		}
+		monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+		for _, m := range []time.Time{monthStart, monthStart.AddDate(0, -1, 0)} {
 			month := m.Format("2006-01")
+			if staleOnly && file != "" && date >= month {
+				ok = true
+				break
+			}
 			e.setDL(fmt.Sprintf("Downloading DB-IP %s lite %s…", kind, month), "")
-			tmp, err := downloadOne(e.dir, kind, month)
+			tmp, err := downloadOneContext(ctx, e.dir, kind, month)
 			if err != nil {
 				lastErr = err
 				continue
@@ -52,6 +74,10 @@ func (e *Enricher) Download() error {
 			return lastErr
 		}
 	}
+	if len(files) == 0 {
+		e.setDL("GeoIP databases are current.", "")
+		return nil
+	}
 	// Release the memory-mapped readers before replacing their files
 	// (Windows will not replace a mapped file).
 	old := e.dbs.Swap(&geoDBs{})
@@ -67,11 +93,16 @@ func (e *Enricher) Download() error {
 	var firstErr error
 	for _, f := range files {
 		final := filepath.Join(e.dir, "dbip-"+f.kind+"-lite.mmdb")
-		os.Remove(final)
-		if err := os.Rename(f.tmp, final); err != nil && firstErr == nil {
+		if err := os.Rename(f.tmp, final); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			os.Remove(f.tmp)
+			continue
+		}
+		if err := os.WriteFile(filepath.Join(e.dir, "dbip-"+f.kind+"-lite.version"), []byte(f.month+"\n"), 0o644); err != nil && firstErr == nil {
 			firstErr = err
 		}
-		os.WriteFile(filepath.Join(e.dir, "dbip-"+f.kind+"-lite.version"), []byte(f.month+"\n"), 0o644)
 	}
 	e.Reload()
 	if firstErr != nil {
@@ -89,11 +120,11 @@ func (e *Enricher) setDL(msg, err string) {
 }
 
 // downloadOne downloads and validates one database into a temporary file.
-func downloadOne(dir, kind, month string) (string, error) {
+func downloadOneContext(parent context.Context, dir, kind, month string) (string, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	ctx, cancel := context.WithTimeout(parent, 15*time.Minute)
 	defer cancel()
 	url := fmt.Sprintf(dbipURL, kind, month)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

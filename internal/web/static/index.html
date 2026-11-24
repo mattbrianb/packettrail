@@ -67,6 +67,7 @@
 <div class="update-banner" id="updateBanner" hidden role="status">
   <span id="updateBannerText"></span>
   <button type="button" class="btn sm" id="updateView">See changes and download</button>
+  <button type="button" class="btn sm" id="updateBannerLater">Later</button>
 </div>
 
 <section class="hero card" aria-label="Machine-wide traffic">
@@ -378,6 +379,7 @@
         <div class="update-notes" id="updateNotes"></div>
         <div class="update-actions">
           <button type="button" class="btn primary" id="updateDownload">Download update</button>
+          <button type="button" class="btn" id="updateLater">Later</button>
           <button type="button" class="btn" id="updateOpen" hidden>Open downloaded update</button>
         </div>
         <p class="row-note" id="updateProgress" role="status"></p>
@@ -526,7 +528,7 @@
           <li>Reverse-DNS queries to your normal DNS server.</li>
           <li>Anonymous PeeringDB lookups by AS number, on the Peering tab.</li>
           <li>The probes you start: diagnostics, monitors and the route map. ISP detection also sends a few pings towards 1.1.1.1, at most every 6 hours.</li>
-          <li>The free DB-IP Lite GeoIP databases: included with the Windows installer, or downloaded only when you click <i>Download latest</i> in Settings.</li>
+          <li>The free DB-IP Lite GeoIP databases: included with the Windows installer, refreshed after an app upgrade or when you click <i>Download latest</i> in Settings.</li>
           <li>Public PacketTrail release metadata from GitHub, checked at launch and every 12 hours. An update file downloads only when you click <i>Download update</i>. History and test results are never sent.</li>
         </ul>
         <p>History, settings and test results stay on this PC.</p>

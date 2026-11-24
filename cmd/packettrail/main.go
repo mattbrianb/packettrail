@@ -32,7 +32,7 @@ import (
 	"packettrail/internal/web"
 )
 
-var version = "1.5.0"
+var version = "1.5.1"
 
 // Publisher and copyright, shown by --version and in the app's About section.
 // Keep in step with winres/winres.json (the Windows file details).
@@ -69,7 +69,7 @@ func main() {
 	flag.BoolVar(&c.loopback, "loopback", false, "include loopback (127.0.0.1 / ::1) traffic")
 	flag.BoolVar(&c.relaunched, "relaunched", false, "internal: set when restarted elevated")
 	flag.BoolVar(&c.demo, "demo", false, "test aid: real connections with synthetic byte counts, stored in packettrail-demo.db")
-	flag.BoolVar(&c.noGeoDL, "no-geoip-download", false, "deprecated compatibility flag; GeoIP downloads are manual")
+	flag.BoolVar(&c.noGeoDL, "no-geoip-download", false, "skip automatic GeoIP refresh after upgrading")
 	showVersion := flag.Bool("version", false, "print version and exit")
 	install := flag.Bool("install", false, "Linux: add PacketTrail to your applications menu, then exit")
 	uninstall := flag.Bool("uninstall", false, "Linux: remove PacketTrail from your applications menu, then exit")
@@ -241,6 +241,7 @@ func run(c config) (string, error) {
 	if c.demo {
 		dbName = "packettrail-demo.db"
 	}
+	_, historyErr := os.Stat(filepath.Join(c.dataDir, dbName))
 	st, err := store.Open(filepath.Join(c.dataDir, dbName))
 	if err != nil {
 		return "", fmt.Errorf("open history database: %w", err)
@@ -248,8 +249,6 @@ func run(c config) (string, error) {
 	defer st.Close()
 	enr := enrich.New(c.dataDir, st)
 	defer enr.Close()
-	// Databases are installed once with the app. Updates are requested from
-	// Settings; launching the app never starts an unsolicited download.
 
 	capt, procs := capture.New(capture.Options{Unprivileged: c.limited})
 	if c.demo {
@@ -291,6 +290,25 @@ func run(c config) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	var bg sync.WaitGroup
+	if !c.demo && !c.noGeoDL {
+		marker := filepath.Join(c.dataDir, "geoip-app-version")
+		previous, readErr := os.ReadFile(marker)
+		if string(previous) != version {
+			bg.Add(1)
+			go func() {
+				defer bg.Done()
+				if historyErr == nil || readErr == nil {
+					if err := enr.RefreshAfterUpgrade(ctx); err != nil {
+						log.Printf("GeoIP upgrade refresh: %v", err)
+						return
+					}
+				}
+				if err := os.WriteFile(marker, []byte(version), 0600); err != nil {
+					log.Printf("GeoIP version marker: %v", err)
+				}
+			}()
+		}
+	}
 	bg.Add(1)
 	go func() {
 		defer bg.Done()

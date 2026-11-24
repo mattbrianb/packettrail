@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "1.5.0"
+  #define AppVersion "1.5.1"
 #endif
 #ifndef SourceDir
   #error SourceDir must point to the staged Windows files

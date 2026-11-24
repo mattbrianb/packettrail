@@ -1,6 +1,6 @@
 # PacketTrail
 
-By Matthew Burnett · version 1.5.0 · MIT licence ·
+By Matthew Burnett · version 1.5.1 · MIT licence ·
 **[Website](https://mattbrianb.github.io/packettrail/)** ·
 **[Download](https://github.com/mattbrianb/packettrail/releases/latest)** ·
 **[Donate](https://paypal.me/matthewbrianburnett)**
@@ -22,7 +22,7 @@ hostname the app actually looked up.
   (diagnostics, monitors, route map, and a few ICMP probes towards 1.1.1.1
   for ISP detection, at most every 6 hours); and the free DB-IP Lite GeoIP
   databases (about 135 MB), included in the Windows installer. Updates
-  download only when you click *Settings → Download latest*. On macOS and
+  refresh after an app upgrade or when you click *Settings → Download latest*. On macOS and
   Linux, use that button once if the databases are missing. PacketTrail also
   checks its public GitHub release metadata at launch and every 12 hours;
   update files download only after you choose them in Settings.
@@ -399,7 +399,7 @@ packettrail.exe [options]
   --demo           test aid: real connections with synthetic byte counts, stored in packettrail-demo.db
                    (shows the computer name as DEMO-PC, for screenshots)
   --no-geoip-download
-                   deprecated compatibility flag; downloads are manual
+                   skip automatic GeoIP refresh after upgrading
   --version
 ```
 
@@ -557,7 +557,7 @@ browser as the desktop user instead of a root window. The Linux build uses a
 `~/.config/packettrail` folder (or `--data DIR` for a custom location).
 
 On macOS and Linux, use *Settings → Download latest* once to install the
-free GeoIP databases. PacketTrail never downloads them at launch.
+free GeoIP databases. After an app upgrade, PacketTrail checks for missing or stale databases on the next launch.
 
 What's weaker than on Windows, and why:
 - **Linux without root** has no UDP and no DNS names, and can only attribute
