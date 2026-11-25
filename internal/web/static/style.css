@@ -1319,15 +1319,21 @@ kbd {
 .process-section th {
   position: static;
   cursor: default;
-  text-align: left;
-  padding: 10px 12px;
-  border-block-start: 6px solid var(--card);
-  background: var(--accent-soft);
-  background-clip: padding-box;
+  padding: 12px 10px 6px;
+  background: var(--card);
   color: var(--text);
-  font-size: 16px;
-  line-height: 1.35;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
   box-shadow: none;
 }
-tr + .process-section th { border-block-start-width: 16px; }
+tr + .process-section th { padding-block-start: 20px; }
+.process-section-label { display: flex; align-items: baseline; gap: 5px; }
+.process-section-count { color: var(--text-2); font-size: 12px; font-weight: 400; }
+.process-section-label::after {
+  content: "";
+  flex: 1;
+  align-self: center;
+  margin-inline-start: 6px;
+  border-block-start: 1px solid var(--hair);
+}

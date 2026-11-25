@@ -300,12 +300,19 @@ class Table {
         if (!ent) {
           const tr = document.createElement('tr');
           tr.className = 'process-section';
-          tr.append(document.createElement('th'));
-          ent = {tr};
+          const th = document.createElement('th');
+          const label = document.createElement('span');
+          label.className = 'process-section-label';
+          const count = document.createElement('span');
+          count.className = 'process-section-count';
+          label.append(r.section + ' ', count);
+          th.append(label);
+          tr.append(th);
+          ent = {tr, count};
           this.ents.set(key, ent);
         }
         ent.tr.firstChild.colSpan = cols.length;
-        ent.tr.firstChild.textContent = r.section + ' (' + r.count + ')';
+        ent.count.textContent = '(' + r.count + ')';
         skipClosing();
         if (cursor === ent.tr) cursor = cursor.nextSibling;
         else this.tbody.insertBefore(ent.tr, cursor);
