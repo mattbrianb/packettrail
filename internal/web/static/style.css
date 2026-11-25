@@ -1316,4 +1316,18 @@ kbd {
 .proc-toggle { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; color: inherit; font: inherit; background: transparent; border: 0; cursor: pointer; }
 .proc-child { padding-inline-start: 24px; }
 
-.process-section th { position: static; cursor: default; text-align: left; padding: 10px 8px 6px; font-weight: 650; }
+.process-section th {
+  position: static;
+  cursor: default;
+  text-align: left;
+  padding: 10px 12px;
+  border-block-start: 6px solid var(--card);
+  background: var(--accent-soft);
+  background-clip: padding-box;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  box-shadow: none;
+}
+tr + .process-section th { border-block-start-width: 16px; }
