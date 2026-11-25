@@ -622,6 +622,12 @@ from PATH (Go 1.27+). No C compiler is needed. For a Windows installer,
 `dist\data`; if they are missing, `go run ./tools/geoipseed -dir dist/data`
 fetches and validates them from DB-IP before packaging.
 
+For a public release, push the version tag and create a draft release with the
+Windows and Linux packages and `SHA256SUMS.txt`. Run the **macOS app** workflow
+manually with that tag. Wait for it to finish and verify the checksum manifest
+covers all six packages, including both Mac ZIPs, before publishing the draft.
+This keeps the website and in-app updater on a complete release during packaging.
+
 Layout:
 - `cmd/packettrail`: entry point, self-test, demo mode, Windows resources
   (icon and manifest).

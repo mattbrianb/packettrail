@@ -17,6 +17,8 @@ permissions:
 
 jobs:
   macos-app:
+    # Draft releases can already contain the signed bundles when published.
+    if: github.event_name != 'release' || !contains(github.event.release.assets.*.name, 'packettrail-macos-arm64.zip') || !contains(github.event.release.assets.*.name, 'packettrail-macos-x64.zip')
     runs-on: macos-latest
     env:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
@@ -41,8 +43,8 @@ jobs:
           cd dist/release
           gh release upload "$TAG" packettrail-macos-arm64.zip packettrail-macos-x64.zip --clobber
           # add the two zips to SHA256SUMS.txt (replacing any older macOS lines)
-          gh release download "$TAG" --pattern SHA256SUMS.txt --dir sums || mkdir -p sums
-          touch sums/SHA256SUMS.txt
+          gh release download "$TAG" --pattern SHA256SUMS.txt --dir sums
+          test -s sums/SHA256SUMS.txt
           # (tr: the file must have Unix line endings, or "sha256sum -c" fails)
           tr -d '\r' < sums/SHA256SUMS.txt | grep -v 'packettrail-macos-' > sums/new.txt || true
           shasum -a 256 packettrail-macos-arm64.zip packettrail-macos-x64.zip >> sums/new.txt
