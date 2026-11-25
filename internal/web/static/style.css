@@ -1315,3 +1315,5 @@ kbd {
 
 .proc-toggle { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; color: inherit; font: inherit; background: transparent; border: 0; cursor: pointer; }
 .proc-child { padding-inline-start: 24px; }
+
+.process-section th { position: static; cursor: default; text-align: left; padding: 10px 8px 6px; font-weight: 650; }

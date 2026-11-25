@@ -271,7 +271,7 @@ class Table {
   }
   render(force) {
     const filtered = this.filtered();
-    const rows = this.opts.displayRows ? this.opts.displayRows(filtered) : filtered;
+    const rows = this.opts.displayRows ? this.opts.displayRows(filtered, this.rows) : filtered;
     this.pending = !force && this.frozen();
     this.updateCount(this.opts.displayRows ? filtered : rows);
     if (this.pending) return;
@@ -290,7 +290,28 @@ class Table {
     const seen = new Set();
     let cursor = this.tbody.firstChild;
     const skipClosing = () => { while (cursor && cursor.classList.contains('closing')) cursor = cursor.nextSibling; };
-    for (const r of rows.slice(0, this.limit)) {
+    let displayed = 0;
+    for (const r of rows) {
+      if (displayed >= this.limit) break;
+      if (r.section) {
+        const key = 'section:' + r.section;
+        seen.add(key);
+        let ent = this.ents.get(key);
+        if (!ent) {
+          const tr = document.createElement('tr');
+          tr.className = 'process-section';
+          tr.append(document.createElement('th'));
+          ent = {tr};
+          this.ents.set(key, ent);
+        }
+        ent.tr.firstChild.colSpan = cols.length;
+        ent.tr.firstChild.textContent = r.section + ' (' + r.count + ')';
+        skipClosing();
+        if (cursor === ent.tr) cursor = cursor.nextSibling;
+        else this.tbody.insertBefore(ent.tr, cursor);
+        continue;
+      }
+      displayed++;
       const k = this.key(r);
       if (seen.has(k)) continue;
       seen.add(k);
@@ -2596,7 +2617,8 @@ function utilHtml(r) {
   return `<span class="meter-cell">${meter(u, lvlOf(u, 70, 85))}<span>${fmtPct(u, u < 10 ? 1 : 0)}</span></span>`;
 }
 const openProcessGroups = new Set();
-function processDisplayRows(processes) {
+function processDisplayRows(processes, allProcesses = processes) {
+  const appKeys = new Set(allProcesses.filter(p => p.desktopApp).map(p => p.path || p.name));
   const buckets = new Map();
   for (const proc of processes) {
     const key = proc.path || proc.name;
@@ -2614,10 +2636,16 @@ function processDisplayRows(processes) {
   }
   // Processes were already filtered. Sort summaries using their totals.
   const result = [];
-  for (const row of tables.procs.sorted(groups)) {
-    result.push(row);
-    if (row.members && openProcessGroups.has(row.groupKey)) {
-      for (const child of row.members) result.push({...child, child: true});
+  const sorted = tables.procs.sorted(groups);
+  for (const isApp of [true, false]) {
+    const section = sorted.filter(row => appKeys.has(row.path || row.name) === isApp);
+    if (!section.length) continue;
+    result.push({section: isApp ? 'Apps' : 'Background processes', count: section.length});
+    for (const row of section) {
+      result.push(row);
+      if (row.members && openProcessGroups.has(row.groupKey)) {
+        for (const child of row.members) result.push({...child, child: true});
+      }
     }
   }
   return result;

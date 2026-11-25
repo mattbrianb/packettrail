@@ -104,14 +104,15 @@ type TCP struct {
 
 // Proc is one process.
 type Proc struct {
-	PID     int     `json:"pid"`
-	Name    string  `json:"name"`
-	Path    string  `json:"path,omitempty"`
-	CPU     float64 `json:"cpu"` // % of the whole machine
-	Mem     uint64  `json:"mem"` // private working set / resident
-	IO      float64 `json:"io"`  // bytes/s of all I/O, -1 = unknown
-	Threads int     `json:"threads"`
-	Handles int     `json:"handles"` // -1 = unknown
+	DesktopApp bool    `json:"desktopApp,omitempty"`
+	PID        int     `json:"pid"`
+	Name       string  `json:"name"`
+	Path       string  `json:"path,omitempty"`
+	CPU        float64 `json:"cpu"` // % of the whole machine
+	Mem        uint64  `json:"mem"` // private working set / resident
+	IO         float64 `json:"io"`  // bytes/s of all I/O, -1 = unknown
+	Threads    int     `json:"threads"`
+	Handles    int     `json:"handles"` // -1 = unknown
 	// Filled in by the web layer from the capture engine:
 	App    string  `json:"app,omitempty"`
 	NetIn  float64 `json:"netIn"`
@@ -544,8 +545,9 @@ func utilOf(bytesPerSec float64, bitsPerSec uint64) float64 {
 
 // procPrev remembers a process's counters between samples.
 type procPrev struct {
-	start uint64 // creation time or start ticks, to spot PID reuse
-	cpu   uint64
-	io    uint64
-	seen  bool
+	desktopApp bool
+	start      uint64 // creation time or start ticks, to spot PID reuse
+	cpu        uint64
+	io         uint64
+	seen       bool
 }

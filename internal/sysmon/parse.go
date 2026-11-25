@@ -160,6 +160,7 @@ func parseSnmp(text string) map[string]map[string]uint64 {
 
 // pidStat is the part of /proc/<pid>/stat we use.
 type pidStat struct {
+	parent              int
 	name                string
 	utime, stime, start uint64
 	threads             int
@@ -177,7 +178,7 @@ func parsePidStat(text string) (pidStat, bool) {
 		return pidStat{}, false
 	}
 	th, _ := strconv.Atoi(f[17])
-	return pidStat{name: text[l+1 : r], utime: atou(f[11]), stime: atou(f[12]), threads: th, start: atou(f[19]), rssPages: atou(f[21])}, true
+	return pidStat{parent: int(atou(f[1])), name: text[l+1 : r], utime: atou(f[11]), stime: atou(f[12]), threads: th, start: atou(f[19]), rssPages: atou(f[21])}, true
 }
 
 // parseProcIO returns rchar+wchar (all reads and writes, including sockets).

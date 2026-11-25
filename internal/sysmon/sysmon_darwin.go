@@ -21,20 +21,22 @@ import (
 // Per-core CPU, disk busy time and handle counts are not available this way.
 
 type macSource struct {
-	ncpu   int
-	total  uint64
-	boot   int64
-	prevAt time.Time
-	prevIf map[string]macIf
-	prevNS netstatS
-	haveNS bool
-	media  map[string][2]uint64
-	ports  map[string]string // device -> hardware port ("Wi-Fi", "Ethernet", ...)
-	slowAt time.Time
-	disks  []Disk
-	cancel context.CancelFunc
-	mu     sync.Mutex
-	io     struct {
+	appPIDs map[int]bool
+	appsAt  time.Time
+	ncpu    int
+	total   uint64
+	boot    int64
+	prevAt  time.Time
+	prevIf  map[string]macIf
+	prevNS  netstatS
+	haveNS  bool
+	media   map[string][2]uint64
+	ports   map[string]string // device -> hardware port ("Wi-Fi", "Ethernet", ...)
+	slowAt  time.Time
+	disks   []Disk
+	cancel  context.CancelFunc
+	mu      sync.Mutex
+	io      struct {
 		mbps, us, sy, id float64
 		load             []float64
 		ok               bool
@@ -249,12 +251,24 @@ func (s *macSource) stack(snap *Snapshot, secs float64) {
 }
 
 func (s *macSource) procs(snap *Snapshot) {
+	if time.Since(s.appsAt) >= 10*time.Second {
+		// NSWorkspace exposes regular GUI applications without Automation permission.
+		const query = "ObjC.import('AppKit'); $.NSWorkspace.sharedWorkspace.runningApplications.js.filter(a => a.activationPolicy === 0).map(a => a.processIdentifier).join(' ')"
+		pidFields := strings.Fields(run("/usr/bin/osascript", "-l", "JavaScript", "-e", query))
+		s.appPIDs = make(map[int]bool, len(pidFields))
+		for _, value := range pidFields {
+			if pid, err := strconv.Atoi(value); err == nil {
+				s.appPIDs[pid] = true
+			}
+		}
+		s.appsAt = time.Now()
+	}
 	ncpu := float64(max(1, s.ncpu))
 	for _, p := range parsePs(run("ps", "-axo", "pid=,pcpu=,rss=,comm=")) {
 		if p.pid == 0 {
 			continue
 		}
-		pr := Proc{PID: p.pid, Name: filepath.Base(p.comm), CPU: math.Min(100, p.cpu/ncpu), Mem: p.rss, IO: -1, Threads: -1, Handles: -1}
+		pr := Proc{DesktopApp: s.appPIDs[p.pid], PID: p.pid, Name: filepath.Base(p.comm), CPU: math.Min(100, p.cpu/ncpu), Mem: p.rss, IO: -1, Threads: -1, Handles: -1}
 		if strings.HasPrefix(p.comm, "/") {
 			pr.Path = p.comm
 		}

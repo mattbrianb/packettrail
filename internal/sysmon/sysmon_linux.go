@@ -265,6 +265,20 @@ func (s *linuxSource) stack(snap *Snapshot, secs float64) {
 	s.prevSnmp = cur
 }
 
+// Graphical session managers place launched desktop apps in app-*.scope.
+// GIO also records the actual launch PID, including on desktops without systemd.
+func linuxDesktopApp(dir string, pid, parent int) bool {
+	group := readText(dir + "cgroup")
+	for _, line := range strings.Fields(group) {
+		part := filepath.Base(line)
+		if strings.HasPrefix(part, "app-") && strings.HasSuffix(part, ".scope") && group != readText(filepath.Join(dir, "..", strconv.Itoa(parent), "cgroup")) {
+			return true
+		}
+	}
+	env := readText(dir + "environ")
+	return strings.Contains("\x00"+env, "\x00GIO_LAUNCHED_DESKTOP_FILE_PID="+strconv.Itoa(pid)+"\x00")
+}
+
 func (s *linuxSource) procs(snap *Snapshot, secs float64) {
 	ents, err := os.ReadDir("/proc")
 	if err != nil {
@@ -297,9 +311,10 @@ func (s *linuxSource) procs(snap *Snapshot, secs float64) {
 			}
 		}
 		if pr == nil || pr.start != st.start {
-			pr = &procPrev{}
+			pr = &procPrev{desktopApp: linuxDesktopApp(dir, pid, st.parent)}
 			s.prevProc[pid] = pr
 		}
+		p.DesktopApp = pr.desktopApp
 		pr.start, pr.cpu, pr.io = st.start, cpu, io
 		seen[pid] = true
 		snap.Procs = append(snap.Procs, p)

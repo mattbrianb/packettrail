@@ -448,6 +448,24 @@ func (s *winSource) stack(snap *Snapshot, secs float64) {
 	s.prevTCP, s.prevUDP, s.haveStack = cur, udp, true
 }
 
+// EnumWindows invokes this callback synchronously. Register it once, as
+// Windows callback trampolines cannot be released.
+var user32 = windows.NewLazySystemDLL("user32.dll")
+var windowStyle = user32.NewProc("GetWindowLongW")
+var windowOwner = user32.NewProc("GetWindow")
+var appWindowCallback = windows.NewCallback(func(hwnd windows.HWND, data unsafe.Pointer) uintptr {
+	if windows.IsWindowVisible(hwnd) {
+		style, _, _ := windowStyle.Call(uintptr(hwnd), uintptr(^uint32(19))) // GWL_EXSTYLE (-20)
+		owner, _, _ := windowOwner.Call(uintptr(hwnd), 4)                    // GW_OWNER
+		if style&0x40000 != 0 || (owner == 0 && style&0x80 == 0) {           // APPWINDOW / TOOLWINDOW
+			var pid uint32
+			windows.GetWindowThreadProcessId(hwnd, &pid)
+			(*(*map[int]bool)(data))[int(pid)] = true
+		}
+	}
+	return 1
+})
+
 func (s *winSource) procs(snap *Snapshot, secs float64) {
 	b := s.ntQuery(sysProcessInformation)
 	if len(b) < 256 {
@@ -456,6 +474,8 @@ func (s *winSource) procs(snap *Snapshot, secs float64) {
 	ncpu := float64(max(1, snap.CPU.Count))
 	base := uintptr(unsafe.Pointer(&b[0]))
 	seen := map[int]bool{}
+	apps := make(map[int]bool)
+	_ = windows.EnumWindows(appWindowCallback, unsafe.Pointer(&apps))
 	livePaths := map[[2]uint64]bool{}
 	for off := 0; off+256 <= len(b); {
 		e := b[off:]
@@ -476,7 +496,7 @@ func (s *winSource) procs(snap *Snapshot, secs float64) {
 			} else if pid == 4 {
 				name = "System"
 			}
-			p := Proc{PID: pid, Name: name, Mem: le64(e, spiPrivateWS), Threads: int(le32(e, spiThreads)),
+			p := Proc{DesktopApp: apps[pid], PID: pid, Name: name, Mem: le64(e, spiPrivateWS), Threads: int(le32(e, spiThreads)),
 				Handles: int(le32(e, spiHandles)), IO: -1}
 			if pr := s.prevProc[pid]; pr != nil && pr.start == created && secs > 0 {
 				p.CPU = math.Min(100, float64(cpu-pr.cpu)/(secs*1e7*ncpu)*100)
